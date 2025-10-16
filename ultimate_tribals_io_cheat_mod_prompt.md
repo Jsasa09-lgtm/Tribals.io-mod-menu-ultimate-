@@ -8,10 +8,10 @@ Create the **most advanced, undetectable, and feature-rich Tribals.io cheat mod*
 ## **📋 EXECUTIVE SUMMARY**
 
 ### **Project Scope**
-- **Target Game**: Tribals.io (Browser-based MMO strategy game)
+- **Target Game**: Tribals.io (Browser-based MMO strategy game using PlayCanvas engine)
 - **Development Timeline**: 2-4 weeks (depending on complexity)
-- **Technology Stack**: Multi-platform (JavaScript/TypeScript, C++, WebAssembly, Python)
-- **Deployment**: Browser extension, standalone executable, or web-based injection
+- **Technology Stack**: PlayCanvas-specific (JavaScript/TypeScript, WebGL, PlayCanvas API)
+- **Deployment**: Browser extension, web-based injection, or PlayCanvas script injection
 - **Maintenance**: Continuous updates and anti-detection improvements
 
 ### **Success Metrics**
@@ -26,10 +26,11 @@ Create the **most advanced, undetectable, and feature-rich Tribals.io cheat mod*
 
 ### **1. AUTO-FARMING SYSTEM PRO MAX**
 
-#### **1.1 Intelligent Resource Management**
+#### **1.1 PlayCanvas-Specific Resource Management**
 ```javascript
 class AdvancedAutoFarm {
     constructor() {
+        this.app = window.pc.Application.getApplication(); // PlayCanvas app instance
         this.resourcePriorities = {
             wood: { weight: 0.3, minLevel: 1, maxDistance: 1000 },
             stone: { weight: 0.4, minLevel: 2, maxDistance: 1500 },
@@ -37,21 +38,66 @@ class AdvancedAutoFarm {
         };
         this.humanBehaviorSimulator = new HumanBehaviorSimulator();
         this.antiDetectionEngine = new AntiDetectionEngine();
+        this.playCanvasHooks = new PlayCanvasHooks();
     }
 
     async startFarming() {
+        // Hook into PlayCanvas update loop
+        this.app.on('update', this.onPlayCanvasUpdate.bind(this));
+        
         while (this.isActive) {
-            const targets = await this.scanForResources();
+            const targets = await this.scanForPlayCanvasResources();
             const optimalTarget = this.calculateOptimalTarget(targets);
             
             if (optimalTarget) {
                 await this.humanBehaviorSimulator.moveToTarget(optimalTarget);
-                await this.collectResource(optimalTarget);
+                await this.collectPlayCanvasResource(optimalTarget);
                 await this.humanBehaviorSimulator.randomIdle();
             }
             
             await this.antiDetectionEngine.randomDelay(1000, 5000);
         }
+    }
+    
+    async scanForPlayCanvasResources() {
+        // Access PlayCanvas scene graph to find resource entities
+        const scene = this.app.scene;
+        const resources = [];
+        
+        // Find all entities with resource components
+        scene.findComponents('script').forEach(component => {
+            if (component.entity.tags.has('resource')) {
+                const position = component.entity.getPosition();
+                const resourceType = component.entity.tags.list().find(tag => 
+                    ['wood', 'stone', 'gold'].includes(tag)
+                );
+                
+                resources.push({
+                    entity: component.entity,
+                    type: resourceType,
+                    position: position,
+                    distance: this.calculateDistance(position)
+                });
+            }
+        });
+        
+        return resources;
+    }
+    
+    async collectPlayCanvasResource(target) {
+        // Simulate click on PlayCanvas entity
+        const clickEvent = new pc.MouseEvent('click', {
+            x: target.position.x,
+            y: target.position.y,
+            button: pc.MOUSEBUTTON_LEFT
+        });
+        
+        // Trigger PlayCanvas mouse event
+        target.entity.fire('mousedown', clickEvent);
+        target.entity.fire('mouseup', clickEvent);
+        
+        // Wait for collection animation
+        await this.waitForCollection(target.entity);
     }
 }
 ```
@@ -101,18 +147,20 @@ class AntiDetectionEngine {
 
 ### **2. RESOURCE HACKING SYSTEM ULTRA**
 
-#### **2.1 Multi-Vector Resource Injection**
+#### **2.1 PlayCanvas-Specific Resource Injection**
 ```javascript
 class ResourceHackUltra {
     constructor() {
+        this.app = window.pc.Application.getApplication();
         this.injectionMethods = [
-            new MemoryInjection(),
-            new NetworkInjection(),
-            new GameStateInjection(),
-            new WebAssemblyInjection()
+            new PlayCanvasStateInjection(),
+            new PlayCanvasNetworkInjection(),
+            new PlayCanvasScriptInjection(),
+            new PlayCanvasEntityInjection()
         ];
         this.encryptionEngine = new AES256Encryption();
         this.stealthMode = true;
+        this.playCanvasHooks = new PlayCanvasHooks();
     }
 
     async injectResources(resourceType, amount) {
@@ -127,11 +175,46 @@ class ResourceHackUltra {
             checksum: this.generateChecksum(amount)
         });
         
-        // Execute injection with anti-detection
-        await method.inject(encryptedPayload);
+        // Execute PlayCanvas-specific injection
+        await method.injectPlayCanvas(encryptedPayload);
         
         // Verify injection success
-        return await this.verifyInjection(resourceType, amount);
+        return await this.verifyPlayCanvasInjection(resourceType, amount);
+    }
+    
+    async injectPlayCanvasResources(resourceType, amount) {
+        // Method 1: Direct PlayCanvas state manipulation
+        const playerEntity = this.findPlayerEntity();
+        if (playerEntity) {
+            const resourceScript = playerEntity.getComponent('script');
+            if (resourceScript) {
+                // Access the player's resource data
+                const currentResources = resourceScript.resources || {};
+                currentResources[resourceType] = (currentResources[resourceType] || 0) + amount;
+                
+                // Update the PlayCanvas entity
+                resourceScript.resources = currentResources;
+                resourceScript.fire('resourceUpdate', { type: resourceType, amount: amount });
+            }
+        }
+        
+        // Method 2: PlayCanvas event system manipulation
+        this.app.fire('resourceHack', {
+            type: resourceType,
+            amount: amount,
+            timestamp: Date.now()
+        });
+        
+        // Method 3: Direct script execution in PlayCanvas context
+        const scriptCode = `
+            if (window.player && window.player.resources) {
+                window.player.resources.${resourceType} = (window.player.resources.${resourceType} || 0) + ${amount};
+                window.player.fire('resourceUpdate', { type: '${resourceType}', amount: ${amount} });
+            }
+        `;
+        
+        // Execute in PlayCanvas context
+        this.executeInPlayCanvasContext(scriptCode);
     }
 }
 ```
@@ -171,40 +254,121 @@ class NetworkInterceptor:
 
 ### **3. ESP (ENEMY/STRUCTURE/PLAYER) SYSTEM GOD MODE**
 
-#### **3.1 Advanced Overlay Rendering**
+#### **3.1 PlayCanvas-Specific Overlay Rendering**
 ```javascript
 class ESPGodMode {
     constructor() {
-        this.renderer = new WebGLRenderer();
-        this.overlayManager = new OverlayManager();
-        this.entityTracker = new EntityTracker();
-        this.stealthRenderer = new StealthRenderer();
+        this.app = window.pc.Application.getApplication();
+        this.renderer = this.app.graphicsDevice; // PlayCanvas WebGL device
+        this.overlayManager = new PlayCanvasOverlayManager();
+        this.entityTracker = new PlayCanvasEntityTracker();
+        this.stealthRenderer = new PlayCanvasStealthRenderer();
+        this.playCanvasHooks = new PlayCanvasHooks();
     }
 
     async initializeESP() {
-        // Hook into game's rendering pipeline
-        this.hookGameRenderer();
+        // Hook into PlayCanvas rendering pipeline
+        this.hookPlayCanvasRenderer();
         
-        // Set up overlay canvas
-        this.overlayCanvas = this.createInvisibleCanvas();
+        // Set up overlay canvas that renders on top of PlayCanvas
+        this.overlayCanvas = this.createPlayCanvasOverlay();
         
-        // Start entity tracking
-        this.entityTracker.startTracking();
+        // Start PlayCanvas entity tracking
+        this.entityTracker.startPlayCanvasTracking();
         
-        // Begin stealth rendering
-        this.stealthRenderer.startRendering();
+        // Begin stealth rendering using PlayCanvas WebGL context
+        this.stealthRenderer.startPlayCanvasRendering();
+    }
+    
+    hookPlayCanvasRenderer() {
+        // Hook into PlayCanvas post-render pipeline
+        this.app.on('postrender', this.onPlayCanvasPostRender.bind(this));
+        
+        // Hook into PlayCanvas update loop for entity tracking
+        this.app.on('update', this.onPlayCanvasUpdate.bind(this));
+        
+        // Override PlayCanvas camera methods for world-to-screen conversion
+        this.overridePlayCanvasCamera();
+    }
+    
+    onPlayCanvasPostRender() {
+        // Render ESP overlay after PlayCanvas renders the game
+        this.renderESPElements();
+    }
+    
+    onPlayCanvasUpdate(dt) {
+        // Update entity positions and visibility
+        this.updateEntityTracking();
+    }
+    
+    createPlayCanvasOverlay() {
+        // Create overlay canvas that matches PlayCanvas resolution
+        const canvas = document.createElement('canvas');
+        canvas.style.position = 'absolute';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.pointerEvents = 'none';
+        canvas.style.zIndex = '9999';
+        
+        // Match PlayCanvas canvas size
+        const playCanvasCanvas = this.app.graphicsDevice.canvas;
+        canvas.width = playCanvasCanvas.width;
+        canvas.height = playCanvasCanvas.height;
+        
+        // Insert overlay into PlayCanvas container
+        playCanvasCanvas.parentNode.appendChild(canvas);
+        
+        return canvas;
     }
 
     renderESP() {
-        const entities = this.entityTracker.getVisibleEntities();
+        const entities = this.entityTracker.getVisiblePlayCanvasEntities();
         
         entities.forEach(entity => {
-            const screenPos = this.worldToScreen(entity.position);
+            const screenPos = this.playCanvasWorldToScreen(entity.position);
             const color = this.getEntityColor(entity.type);
             const shape = this.getEntityShape(entity.type);
             
-            this.stealthRenderer.drawEntity(screenPos, color, shape, entity);
+            this.stealthRenderer.drawPlayCanvasEntity(screenPos, color, shape, entity);
         });
+    }
+    
+    playCanvasWorldToScreen(worldPos) {
+        // Use PlayCanvas camera for world-to-screen conversion
+        const camera = this.app.root.findByName('Camera');
+        if (camera && camera.camera) {
+            const screenPos = camera.camera.worldToScreen(worldPos);
+            return {
+                x: screenPos.x * this.app.graphicsDevice.canvas.width,
+                y: screenPos.y * this.app.graphicsDevice.canvas.height
+            };
+        }
+        return { x: 0, y: 0 };
+    }
+    
+    updateEntityTracking() {
+        // Track all PlayCanvas entities with specific tags
+        const scene = this.app.scene;
+        const trackedEntities = [];
+        
+        // Find entities by tags (enemies, resources, buildings)
+        ['enemy', 'resource', 'building', 'player'].forEach(tag => {
+            const entities = scene.findByTag(tag);
+            entities.forEach(entity => {
+                const position = entity.getPosition();
+                const isVisible = this.isEntityVisible(entity);
+                
+                trackedEntities.push({
+                    entity: entity,
+                    position: position,
+                    type: tag,
+                    visible: isVisible,
+                    distance: this.calculateDistance(position)
+                });
+            });
+        });
+        
+        this.trackedEntities = trackedEntities;
     }
 }
 ```
@@ -224,10 +388,11 @@ class ESPGodMode {
 
 ### **4. SPEED HACK SYSTEM MAXIMUM**
 
-#### **4.1 Multi-Dimensional Speed Enhancement**
+#### **4.1 PlayCanvas-Specific Speed Enhancement**
 ```javascript
 class SpeedHackMaximum {
     constructor() {
+        this.app = window.pc.Application.getApplication();
         this.speedMultipliers = {
             movement: 1.0,
             construction: 1.0,
@@ -237,6 +402,7 @@ class SpeedHackMaximum {
         };
         this.adaptiveEngine = new AdaptiveSpeedEngine();
         this.stealthController = new StealthSpeedController();
+        this.playCanvasHooks = new PlayCanvasHooks();
     }
 
     async applySpeedHack(type, multiplier) {
@@ -248,11 +414,59 @@ class SpeedHackMaximum {
         // Apply stealth modifications
         const stealthMultiplier = this.stealthController.calculateStealthMultiplier(multiplier);
         
-        // Update game state
-        await this.updateGameSpeed(type, stealthMultiplier);
+        // Update PlayCanvas game state
+        await this.updatePlayCanvasSpeed(type, stealthMultiplier);
         
         // Monitor for detection
         this.adaptiveEngine.monitorDetection(type);
+    }
+    
+    async updatePlayCanvasSpeed(type, multiplier) {
+        switch (type) {
+            case 'movement':
+                // Hook into PlayCanvas player movement scripts
+                const playerEntity = this.findPlayerEntity();
+                if (playerEntity) {
+                    const movementScript = playerEntity.getComponent('script');
+                    if (movementScript) {
+                        // Override movement speed
+                        movementScript.originalSpeed = movementScript.speed || 1.0;
+                        movementScript.speed = movementScript.originalSpeed * multiplier;
+                    }
+                }
+                break;
+                
+            case 'construction':
+                // Hook into PlayCanvas building construction scripts
+                this.app.root.findComponents('script').forEach(component => {
+                    if (component.entity.tags.has('building')) {
+                        const buildScript = component.entity.getComponent('script');
+                        if (buildScript && buildScript.constructionTime) {
+                            buildScript.originalConstructionTime = buildScript.constructionTime;
+                            buildScript.constructionTime = buildScript.originalConstructionTime / multiplier;
+                        }
+                    }
+                });
+                break;
+                
+            case 'resourceGeneration':
+                // Hook into PlayCanvas resource generation scripts
+                this.app.root.findComponents('script').forEach(component => {
+                    if (component.entity.tags.has('resource')) {
+                        const resourceScript = component.entity.getComponent('script');
+                        if (resourceScript && resourceScript.generationRate) {
+                            resourceScript.originalGenerationRate = resourceScript.generationRate;
+                            resourceScript.generationRate = resourceScript.originalGenerationRate * multiplier;
+                        }
+                    }
+                });
+                break;
+        }
+        
+        // Update PlayCanvas time scale for global speed effects
+        if (this.app.root && this.app.root.script) {
+            this.app.root.script.timeScale = multiplier;
+        }
     }
 }
 ```
@@ -266,36 +480,38 @@ class SpeedHackMaximum {
 
 ## **🏗️ SYSTEM ARCHITECTURE**
 
-### **Core Architecture Diagram**
+### **PlayCanvas-Specific Architecture Diagram**
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    TRIBALS.IO CHEAT MOD                    │
+│                    (PlayCanvas Engine)                     │
 ├─────────────────────────────────────────────────────────────┤
 │  UI Layer (React/Vue.js)                                   │
 │  ├── Configuration Panel                                   │
 │  ├── Real-time Status Dashboard                           │
 │  └── Advanced Settings                                     │
 ├─────────────────────────────────────────────────────────────┤
-│  API Layer (Node.js/Express)                              │
-│  ├── Feature Management API                               │
-│  ├── Configuration API                                    │
-│  └── Status Monitoring API                                │
+│  PlayCanvas Integration Layer                              │
+│  ├── PlayCanvas App Hooks                                  │
+│  ├── Entity System Integration                             │
+│  ├── Script System Hooks                                   │
+│  └── WebGL Context Management                              │
 ├─────────────────────────────────────────────────────────────┤
-│  Core Engine (C++/WebAssembly)                            │
-│  ├── Game State Manager                                   │
-│  ├── Memory Manager                                       │
-│  ├── Anti-Detection Engine                               │
-│  └── Performance Monitor                                  │
+│  Core Engine (JavaScript/TypeScript)                       │
+│  ├── PlayCanvas State Manager                              │
+│  ├── Entity Tracker                                        │
+│  ├── Anti-Detection Engine                                │
+│  └── Performance Monitor                                   │
 ├─────────────────────────────────────────────────────────────┤
-│  Feature Modules (JavaScript/TypeScript)                  │
-│  ├── Auto-Farm Module                                     │
-│  ├── Resource Hack Module                                 │
-│  ├── ESP Module                                           │
-│  └── Speed Hack Module                                    │
+│  Feature Modules (PlayCanvas-Specific)                     │
+│  ├── Auto-Farm Module (Entity-based)                      │
+│  ├── Resource Hack Module (Script Injection)              │
+│  ├── ESP Module (WebGL Overlay)                           │
+│  └── Speed Hack Module (Script Override)                  │
 ├─────────────────────────────────────────────────────────────┤
-│  Stealth Layer (Assembly/WebAssembly)                     │
-│  ├── Code Obfuscation                                     │
-│  ├── Memory Protection                                    │
+│  Stealth Layer (PlayCanvas Obfuscation)                    │
+│  ├── Script Code Obfuscation                              │
+│  ├── Entity Tag Manipulation                              │
 │  ├── Behavior Randomization                               │
 │  └── Detection Evasion                                    │
 └─────────────────────────────────────────────────────────────┘
@@ -318,11 +534,173 @@ class SpeedHackMaximum {
 - **API**: RESTful API with GraphQL support
 
 #### **Core Technologies**
-- **Game Hacking**: C++ with Windows API
-- **Memory Manipulation**: Cheat Engine SDK
-- **Web Injection**: Browser Extension API
-- **Anti-Detection**: Custom assembly routines
-- **Performance**: WebAssembly for critical functions
+- **Game Engine**: PlayCanvas WebGL engine
+- **Script Injection**: PlayCanvas script system hooks
+- **WebGL Rendering**: PlayCanvas graphics device integration
+- **Entity System**: PlayCanvas entity and component system
+- **Anti-Detection**: PlayCanvas-specific obfuscation techniques
+
+### **PlayCanvas-Specific Implementation Details**
+
+#### **PlayCanvas Engine Hooks**
+```javascript
+class PlayCanvasHooks {
+    constructor() {
+        this.app = window.pc.Application.getApplication();
+        this.originalMethods = new Map();
+        this.hooks = new Map();
+    }
+    
+    hookPlayCanvasApp() {
+        // Hook into PlayCanvas application lifecycle
+        this.hookMethod(this.app, 'update', this.onAppUpdate.bind(this));
+        this.hookMethod(this.app, 'postrender', this.onAppPostRender.bind(this));
+        
+        // Hook into PlayCanvas entity system
+        this.hookEntitySystem();
+        
+        // Hook into PlayCanvas script system
+        this.hookScriptSystem();
+    }
+    
+    hookEntitySystem() {
+        // Override entity creation to track new entities
+        const originalAddEntity = this.app.scene.addEntity;
+        this.app.scene.addEntity = (entity) => {
+            const result = originalAddEntity.call(this.app.scene, entity);
+            this.onEntityAdded(entity);
+            return result;
+        };
+        
+        // Override entity removal to clean up tracking
+        const originalRemoveEntity = this.app.scene.removeEntity;
+        this.app.scene.removeEntity = (entity) => {
+            this.onEntityRemoved(entity);
+            return originalRemoveEntity.call(this.app.scene, entity);
+        };
+    }
+    
+    hookScriptSystem() {
+        // Hook into PlayCanvas script component updates
+        this.app.root.findComponents('script').forEach(component => {
+            this.hookScriptComponent(component);
+        });
+    }
+    
+    hookScriptComponent(component) {
+        if (component.update) {
+            const originalUpdate = component.update.bind(component);
+            component.update = (dt) => {
+                this.onScriptUpdate(component, dt);
+                return originalUpdate(dt);
+            };
+        }
+    }
+}
+```
+
+#### **PlayCanvas Entity Tracking**
+```javascript
+class PlayCanvasEntityTracker {
+    constructor() {
+        this.app = window.pc.Application.getApplication();
+        this.trackedEntities = new Map();
+        this.entityFilters = {
+            enemies: ['enemy', 'hostile'],
+            resources: ['wood', 'stone', 'gold', 'resource'],
+            buildings: ['building', 'structure'],
+            players: ['player', 'ally']
+        };
+    }
+    
+    startTracking() {
+        // Track all existing entities
+        this.scanExistingEntities();
+        
+        // Hook into entity creation/removal
+        this.app.on('entityAdded', this.onEntityAdded.bind(this));
+        this.app.on('entityRemoved', this.onEntityRemoved.bind(this));
+        
+        // Update tracking on each frame
+        this.app.on('update', this.updateTracking.bind(this));
+    }
+    
+    scanExistingEntities() {
+        const scene = this.app.scene;
+        scene.findComponents('script').forEach(component => {
+            this.analyzeEntity(component.entity);
+        });
+    }
+    
+    analyzeEntity(entity) {
+        const tags = entity.tags.list();
+        const position = entity.getPosition();
+        
+        // Categorize entity based on tags
+        Object.keys(this.entityFilters).forEach(category => {
+            const categoryTags = this.entityFilters[category];
+            if (categoryTags.some(tag => tags.includes(tag))) {
+                this.trackedEntities.set(entity.guid, {
+                    entity: entity,
+                    category: category,
+                    position: position,
+                    tags: tags,
+                    lastUpdate: Date.now()
+                });
+            }
+        });
+    }
+}
+```
+
+#### **PlayCanvas Resource Injection**
+```javascript
+class PlayCanvasResourceInjector {
+    constructor() {
+        this.app = window.pc.Application.getApplication();
+        this.injectionMethods = [
+            'scriptOverride',
+            'entityManipulation',
+            'eventInjection',
+            'stateModification'
+        ];
+    }
+    
+    async injectResources(resourceType, amount) {
+        const playerEntity = this.findPlayerEntity();
+        if (!playerEntity) return false;
+        
+        // Method 1: Direct script property modification
+        const playerScript = playerEntity.getComponent('script');
+        if (playerScript && playerScript.resources) {
+            playerScript.resources[resourceType] = (playerScript.resources[resourceType] || 0) + amount;
+            playerScript.fire('resourceUpdate', { type: resourceType, amount: amount });
+        }
+        
+        // Method 2: PlayCanvas event system
+        this.app.fire('resourceInjection', {
+            type: resourceType,
+            amount: amount,
+            player: playerEntity
+        });
+        
+        // Method 3: Global state manipulation
+        if (window.gameState && window.gameState.player) {
+            window.gameState.player.resources[resourceType] = 
+                (window.gameState.player.resources[resourceType] || 0) + amount;
+        }
+        
+        return true;
+    }
+    
+    findPlayerEntity() {
+        // Find player entity by tag or name
+        const playerEntity = this.app.scene.findByTag('player')[0] || 
+                           this.app.scene.findByName('Player')[0];
+        return playerEntity;
+    }
+}
+```
 
 ---
 
