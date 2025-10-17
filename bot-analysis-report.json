@@ -1,64 +1,64 @@
 {
-  "timestamp": "2025-10-17T03:14:29.968Z",
+  "timestamp": "2025-10-17T03:28:16.056Z",
   "repository": "current-repository",
   "analysisResults": {
-    "codeQuality": 80,
-    "performance": 98,
-    "security": 81,
-    "maintainability": 94,
-    "testCoverage": 85
+    "codeQuality": 98,
+    "performance": 90,
+    "security": 88,
+    "maintainability": 87,
+    "testCoverage": 71
   },
   "improvements": [
     {
       "id": 1,
-      "type": "Documentation improvement",
-      "confidence": 90,
-      "impact": 24,
-      "files": 5,
-      "linesChanged": 34,
-      "description": "Added comprehensive error handling and validation"
-    },
-    {
-      "id": 2,
       "type": "Code refactoring",
-      "confidence": 92,
-      "impact": 19,
+      "confidence": 93,
+      "impact": 15,
       "files": 5,
-      "linesChanged": 47,
-      "description": "Fixed security vulnerabilities and added input sanitization"
-    },
-    {
-      "id": 3,
-      "type": "Type safety improvements",
-      "confidence": 95,
-      "impact": 18,
-      "files": 2,
-      "linesChanged": 15,
-      "description": "Fixed security vulnerabilities and added input sanitization"
-    },
-    {
-      "id": 4,
-      "type": "Type safety improvements",
-      "confidence": 99,
-      "impact": 19,
-      "files": 5,
-      "linesChanged": 58,
+      "linesChanged": 59,
       "description": "Improved type safety and reduced runtime errors"
     },
     {
-      "id": 5,
+      "id": 2,
       "type": "Security vulnerability fix",
+      "confidence": 91,
+      "impact": 32,
+      "files": 5,
+      "linesChanged": 57,
+      "description": "Improved type safety and reduced runtime errors"
+    },
+    {
+      "id": 3,
+      "type": "Algorithm efficiency improvement",
       "confidence": 93,
-      "impact": 16,
-      "files": 4,
-      "linesChanged": 17,
-      "description": "Added comprehensive error handling and validation"
+      "impact": 31,
+      "files": 5,
+      "linesChanged": 52,
+      "description": "Added comprehensive unit tests for better coverage"
+    },
+    {
+      "id": 4,
+      "type": "Error handling enhancement",
+      "confidence": 99,
+      "impact": 31,
+      "files": 1,
+      "linesChanged": 30,
+      "description": "Added comprehensive unit tests for better coverage"
+    },
+    {
+      "id": 5,
+      "type": "Code refactoring",
+      "confidence": 93,
+      "impact": 22,
+      "files": 3,
+      "linesChanged": 50,
+      "description": "Improved code readability and maintainability"
     }
   ],
   "summary": {
     "totalImprovements": 5,
     "averageConfidence": 94,
-    "totalFilesAffected": 21,
-    "totalLinesChanged": 171
+    "totalFilesAffected": 19,
+    "totalLinesChanged": 248
   }
 }
