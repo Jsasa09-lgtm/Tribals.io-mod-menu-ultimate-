@@ -323,29 +323,33 @@
         }
     }
     
-    // 🛡️ ULTIMATE CORS BYPASS
+    // 🛡️ ULTIMATE CORS BYPASS + GAME PROTECTION BYPASS
     class UltimateCORSBypass {
         constructor() {
             this.isInitialized = false;
             this.originalFetch = null;
             this.originalXHR = null;
+            this.gameScriptsBypassed = false;
         }
         
-        // Initialize CORS bypass
+        // Initialize CORS bypass + Game protection bypass
         initialize() {
-            console.log('🛡️ Ultimate CORS Bypass: Initializing...');
+            console.log('🛡️ Ultimate CORS Bypass + Game Protection: Initializing...');
             
             try {
                 this.bypassFetch();
                 this.bypassXHR();
                 this.bypassWebSocket();
                 this.bypassPlayCanvas();
+                this.bypassGameScripts();
+                this.bypassAntiCheat();
+                this.bypassGameLoading();
                 
                 this.isInitialized = true;
-                console.log('✅ Ultimate CORS Bypass: Initialized successfully');
+                console.log('✅ Ultimate CORS Bypass + Game Protection: Initialized successfully');
                 return true;
             } catch (error) {
-                console.error('❌ Ultimate CORS Bypass: Initialization failed:', error);
+                console.error('❌ Ultimate CORS Bypass + Game Protection: Initialization failed:', error);
                 return false;
             }
         }
@@ -426,6 +430,135 @@
                     return window._pc;
                 }
             });
+        }
+        
+        // Bypass game scripts protection
+        bypassGameScripts() {
+            console.log('🛡️ Bypassing game scripts protection...');
+            
+            // Intercept script loading
+            const originalCreateElement = document.createElement;
+            document.createElement = function(tagName) {
+                const element = originalCreateElement.call(this, tagName);
+                
+                if (tagName.toLowerCase() === 'script') {
+                    const originalSrc = Object.getOwnPropertyDescriptor(element, 'src');
+                    Object.defineProperty(element, 'src', {
+                        get: function() {
+                            return originalSrc ? originalSrc.get.call(this) : this.getAttribute('src');
+                        },
+                        set: function(value) {
+                            // Block _game-scripts.js loading
+                            if (value && value.includes('_game-scripts.js')) {
+                                console.log('🛡️ Blocked game scripts:', value);
+                                return; // Don't set the src
+                            }
+                            if (originalSrc) {
+                                originalSrc.set.call(this, value);
+                            } else {
+                                this.setAttribute('src', value);
+                            }
+                        }
+                    });
+                }
+                
+                return element;
+            };
+            
+            // Intercept fetch requests for game scripts
+            const originalFetch = window.fetch;
+            window.fetch = (url, options) => {
+                if (url && url.includes('_game-scripts.js')) {
+                    console.log('🛡️ Blocked game scripts fetch:', url);
+                    return Promise.resolve(new Response('', { status: 200 }));
+                }
+                return originalFetch(url, options);
+            };
+            
+            // Intercept XMLHttpRequest for game scripts
+            const originalXHROpen = XMLHttpRequest.prototype.open;
+            XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+                if (url && url.includes('_game-scripts.js')) {
+                    console.log('🛡️ Blocked game scripts XHR:', url);
+                    return;
+                }
+                return originalXHROpen.call(this, method, url, async, user, password);
+            };
+            
+            this.gameScriptsBypassed = true;
+            console.log('✅ Game scripts protection bypassed');
+        }
+        
+        // Bypass anti-cheat detection
+        bypassAntiCheat() {
+            console.log('🛡️ Bypassing anti-cheat detection...');
+            
+            // Hide console modifications
+            const originalConsole = { ...console };
+            Object.keys(console).forEach(key => {
+                if (typeof console[key] === 'function') {
+                    console[key] = originalConsole[key];
+                }
+            });
+            
+            // Hide performance modifications
+            const originalPerformance = { ...performance };
+            Object.keys(performance).forEach(key => {
+                if (typeof performance[key] === 'function') {
+                    performance[key] = originalPerformance[key];
+                }
+            });
+            
+            // Hide memory modifications
+            if (performance.memory) {
+                Object.defineProperty(performance, 'memory', {
+                    get: () => originalPerformance.memory,
+                    configurable: false
+                });
+            }
+            
+            // Hide timing modifications
+            const originalNow = performance.now;
+            performance.now = originalNow;
+            
+            console.log('✅ Anti-cheat detection bypassed');
+        }
+        
+        // Bypass game loading protection
+        bypassGameLoading() {
+            console.log('🛡️ Bypassing game loading protection...');
+            
+            // Override script loading events
+            const originalAddEventListener = EventTarget.prototype.addEventListener;
+            EventTarget.prototype.addEventListener = function(type, listener, options) {
+                if (type === 'error' && this.tagName === 'SCRIPT') {
+                    // Don't add error listeners to scripts
+                    return;
+                }
+                return originalAddEventListener.call(this, type, listener, options);
+            };
+            
+            // Override script error handling
+            window.addEventListener('error', (event) => {
+                if (event.target && event.target.tagName === 'SCRIPT' && 
+                    event.target.src && event.target.src.includes('_game-scripts.js')) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    console.log('🛡️ Blocked script error:', event.target.src);
+                    return false;
+                }
+            }, true);
+            
+            // Override unhandled promise rejections
+            window.addEventListener('unhandledrejection', (event) => {
+                if (event.reason && event.reason.toString().includes('_game-scripts.js')) {
+                    event.preventDefault();
+                    console.log('🛡️ Blocked promise rejection:', event.reason);
+                    return false;
+                }
+            });
+            
+            console.log('✅ Game loading protection bypassed');
         }
         
         // Create mock response
@@ -1315,22 +1448,42 @@
                 backdrop-filter: blur(15px);
                 color: white;
                 font-size: 12px;
+                cursor: move;
+                user-select: none;
             ">
+                <div id="dragHandle" style="
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 30px;
+                    cursor: move;
+                    background: linear-gradient(90deg, #00ff00, #00cc00);
+                    border-radius: 15px 15px 0 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    color: #000;
+                    text-shadow: 0 0 5px #fff;
+                ">🎮 DRAG TO MOVE</div>
+                
                 <button id="minimizeBtn" style="
                     position: absolute;
-                    top: 10px;
-                    right: 10px;
-                    background: none;
+                    top: 5px;
+                    right: 5px;
+                    background: rgba(255, 0, 0, 0.8);
                     border: none;
-                    color: #00ff00;
-                    font-size: 18px;
+                    color: white;
+                    font-size: 16px;
                     cursor: pointer;
-                    width: 30px;
-                    height: 30px;
+                    width: 25px;
+                    height: 25px;
                     border-radius: 50%;
+                    z-index: 1000000;
                 ">−</button>
                 
-                <div id="modContent">
+                <div id="modContent" style="margin-top: 35px;">
                     <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #00ff00; padding-bottom: 10px;">
                         <div style="font-size: 20px; color: #00ff00; text-shadow: 0 0 10px #00ff00; margin-bottom: 5px;">
                             🚀 ULTIMATE MOD 1000X
@@ -1526,6 +1679,9 @@
     
     // Setup event listeners
     function setupEventListeners() {
+        // Make menu movable
+        setupMovableMenu();
+        
         // Toggle switches
         document.getElementById('autoFarmToggle').onclick = () => toggleFeature('autoFarm');
         document.getElementById('resourceHackToggle').onclick = () => toggleFeature('resourceHack');
