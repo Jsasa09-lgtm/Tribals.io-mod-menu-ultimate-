@@ -276,6 +276,9 @@
             for (let cheat of Object.values(this.cheatInstances)) {
                 cheat.initialize();
             }
+            
+            // Make cheat instances globally accessible for UI
+            window.cheatInstances = this.cheatInstances;
         }
     }
     
