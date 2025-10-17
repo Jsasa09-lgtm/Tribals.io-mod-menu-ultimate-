@@ -249,6 +249,304 @@ class SpeedHackSystem {
 - **Anti-Detection**: Gradual speed changes to avoid detection
 - **Performance Monitoring**: Real-time FPS and performance tracking
 
+### **5. AIMBOT SYSTEM ULTIMATE**
+
+#### **5.1 Advanced Targeting System**
+```javascript
+class AimbotSystemUltimate {
+    constructor() {
+        this.targetTracker = new TargetTracker();
+        this.aimCalculator = new AimCalculator();
+        this.smoothAim = new SmoothAim();
+        this.antiDetection = new AimbotAntiDetection();
+        this.weaponManager = new WeaponManager();
+    }
+
+    // Advanced target acquisition
+    acquireTargets() {
+        const enemies = this.targetTracker.getVisibleEnemies();
+        const prioritizedTargets = this.prioritizeTargets(enemies);
+        
+        return prioritizedTargets.map(target => ({
+            id: target.id,
+            position: target.position,
+            health: target.health,
+            distance: target.distance,
+            threatLevel: this.calculateThreatLevel(target),
+            aimPoint: this.calculateOptimalAimPoint(target)
+        }));
+    }
+
+    // Intelligent target prioritization
+    prioritizeTargets(enemies) {
+        return enemies.sort((a, b) => {
+            const scoreA = this.calculateTargetScore(a);
+            const scoreB = this.calculateTargetScore(b);
+            return scoreB - scoreA; // Higher score = higher priority
+        });
+    }
+
+    // Calculate target score based on multiple factors
+    calculateTargetScore(target) {
+        const distanceScore = Math.max(0, 1000 - target.distance) / 10; // Closer = higher score
+        const healthScore = (100 - target.health) / 10; // Lower health = higher score
+        const threatScore = target.threatLevel * 20; // Higher threat = higher score
+        const angleScore = this.calculateAngleScore(target); // Better angle = higher score
+        
+        return distanceScore + healthScore + threatScore + angleScore;
+    }
+
+    // Calculate optimal aim point (head, body, etc.)
+    calculateOptimalAimPoint(target) {
+        const weapon = this.weaponManager.getCurrentWeapon();
+        const distance = target.distance;
+        
+        // Headshot for close targets, body for far targets
+        if (distance < 200 && weapon.accuracy > 0.8) {
+            return target.headPosition;
+        } else if (distance < 500) {
+            return target.chestPosition;
+        } else {
+            return target.bodyPosition;
+        }
+    }
+
+    // Smooth aim movement to avoid detection
+    smoothAimToTarget(target) {
+        const currentAim = this.getCurrentAimPosition();
+        const targetAim = target.aimPoint;
+        
+        // Calculate smooth movement curve
+        const smoothCurve = this.smoothAim.calculateSmoothPath(
+            currentAim, 
+            targetAim, 
+            this.getAimSpeed(),
+            this.getAimSmoothing()
+        );
+        
+        // Execute smooth aim movement
+        this.executeSmoothAim(smoothCurve);
+    }
+
+    // Advanced aim prediction
+    predictTargetMovement(target) {
+        const velocity = target.velocity;
+        const acceleration = target.acceleration;
+        const predictionTime = target.distance / this.getProjectileSpeed();
+        
+        return {
+            x: target.position.x + velocity.x * predictionTime + 0.5 * acceleration.x * predictionTime * predictionTime,
+            y: target.position.y + velocity.y * predictionTime + 0.5 * acceleration.y * predictionTime * predictionTime
+        };
+    }
+
+    // Weapon-specific aim adjustments
+    adjustAimForWeapon(weapon, target) {
+        const weaponStats = this.weaponManager.getWeaponStats(weapon);
+        
+        return {
+            spread: weaponStats.spread,
+            recoil: weaponStats.recoil,
+            bulletDrop: this.calculateBulletDrop(target.distance, weaponStats),
+            windage: this.calculateWindage(target.distance, weaponStats)
+        };
+    }
+}
+```
+
+#### **5.2 Aimbot Features**
+- **Intelligent Target Selection**: AI-powered target prioritization
+- **Smooth Aim Movement**: Human-like aiming to avoid detection
+- **Weapon-Specific Adjustments**: Different settings for different weapons
+- **Prediction System**: Advanced target movement prediction
+- **Anti-Detection**: Behavioral mimicry and pattern randomization
+- **Customizable Settings**: Adjustable aim speed, smoothing, and targeting
+
+### **6. NOCLIP SYSTEM ULTIMATE**
+
+#### **6.1 Advanced Collision Bypass**
+```javascript
+class NoclipSystemUltimate {
+    constructor() {
+        this.collisionDetector = new CollisionDetector();
+        this.movementController = new MovementController();
+        this.antiDetection = new NoclipAntiDetection();
+        this.baseNavigator = new BaseNavigator();
+        this.stealthMode = new StealthMode();
+    }
+
+    // Enable noclip mode
+    enableNoclip() {
+        this.collisionDetector.disableCollision();
+        this.movementController.enableFreeMovement();
+        this.stealthMode.activate();
+        
+        // Anti-detection: Gradual activation
+        this.gradualActivation();
+    }
+
+    // Disable noclip mode
+    disableNoclip() {
+        this.collisionDetector.enableCollision();
+        this.movementController.disableFreeMovement();
+        this.stealthMode.deactivate();
+        
+        // Anti-detection: Gradual deactivation
+        this.gradualDeactivation();
+    }
+
+    // Navigate through enemy bases
+    navigateThroughBase(base) {
+        const baseLayout = this.analyzeBaseLayout(base);
+        const optimalPath = this.calculateOptimalPath(baseLayout);
+        
+        // Execute stealth navigation
+        this.executeStealthNavigation(optimalPath);
+    }
+
+    // Analyze base layout for optimal navigation
+    analyzeBaseLayout(base) {
+        return {
+            walls: base.walls,
+            buildings: base.buildings,
+            traps: base.traps,
+            guardPositions: base.guardPositions,
+            entryPoints: this.findEntryPoints(base),
+            exitPoints: this.findExitPoints(base),
+            lootLocations: this.findLootLocations(base)
+        };
+    }
+
+    // Calculate optimal path through base
+    calculateOptimalPath(baseLayout) {
+        const pathfinder = new AdvancedPathfinder();
+        const startPoint = this.getPlayerPosition();
+        const endPoint = baseLayout.lootLocations[0]; // Target first loot location
+        
+        return pathfinder.findPath(startPoint, endPoint, {
+            avoidGuards: true,
+            avoidTraps: true,
+            minimizeDetection: true,
+            useNoclip: true
+        });
+    }
+
+    // Execute stealth navigation
+    executeStealthNavigation(path) {
+        path.forEach((point, index) => {
+            // Move to point with stealth
+            this.moveToPointStealth(point);
+            
+            // Check for guards
+            if (this.detectNearbyGuards(point)) {
+                this.avoidGuard(point);
+            }
+            
+            // Check for traps
+            if (this.detectTraps(point)) {
+                this.avoidTrap(point);
+            }
+            
+            // Random delay to avoid detection
+            this.randomDelay(100, 500);
+        });
+    }
+
+    // Stealth movement to avoid detection
+    moveToPointStealth(point) {
+        const currentPos = this.getPlayerPosition();
+        const distance = this.calculateDistance(currentPos, point);
+        
+        // Break movement into smaller steps
+        const steps = Math.ceil(distance / 10);
+        const stepSize = distance / steps;
+        
+        for (let i = 0; i < steps; i++) {
+            const stepPoint = this.calculateStepPoint(currentPos, point, i * stepSize);
+            this.moveToPoint(stepPoint);
+            
+            // Random micro-delay
+            this.randomDelay(10, 50);
+        }
+    }
+
+    // Advanced base infiltration
+    infiltrateBase(base) {
+        const infiltrationPlan = this.createInfiltrationPlan(base);
+        
+        infiltrationPlan.phases.forEach(phase => {
+            this.executePhase(phase);
+        });
+    }
+
+    // Create detailed infiltration plan
+    createInfiltrationPlan(base) {
+        return {
+            phases: [
+                {
+                    name: 'Reconnaissance',
+                    actions: ['scan_base', 'identify_guards', 'map_layout'],
+                    duration: 5000
+                },
+                {
+                    name: 'Infiltration',
+                    actions: ['enter_base', 'avoid_detection', 'reach_target'],
+                    duration: 10000
+                },
+                {
+                    name: 'Looting',
+                    actions: ['collect_resources', 'avoid_guards', 'stay_stealth'],
+                    duration: 15000
+                },
+                {
+                    name: 'Extraction',
+                    actions: ['exit_base', 'avoid_detection', 'return_safe'],
+                    duration: 8000
+                }
+            ],
+            totalDuration: 38000,
+            successRate: 0.95
+        };
+    }
+
+    // Anti-detection for noclip
+    enableAntiDetection() {
+        this.antiDetection.randomizeMovementPatterns();
+        this.antiDetection.simulateCollisionChecks();
+        this.antiDetection.addFakePhysics();
+        this.antiDetection.randomizeTiming();
+    }
+
+    // Gradual activation to avoid detection
+    gradualActivation() {
+        const steps = 10;
+        const stepDelay = 100;
+        
+        for (let i = 0; i < steps; i++) {
+            setTimeout(() => {
+                this.partialActivation(i / steps);
+            }, i * stepDelay);
+        }
+    }
+
+    // Partial activation for gradual effect
+    partialActivation(percentage) {
+        this.collisionDetector.setCollisionThreshold(1 - percentage);
+        this.movementController.setSpeedMultiplier(1 + percentage * 2);
+    }
+}
+```
+
+#### **6.2 Noclip Features**
+- **Collision Bypass**: Walk through walls, buildings, and obstacles
+- **Base Navigation**: Intelligent pathfinding through enemy bases
+- **Stealth Mode**: Avoid detection while using noclip
+- **Loot Collection**: Access hidden resources and loot
+- **Guard Avoidance**: Smart AI to avoid enemy guards
+- **Trap Detection**: Identify and avoid traps
+- **Anti-Detection**: Behavioral mimicry to avoid detection
+- **Gradual Activation**: Smooth activation to avoid suspicion
+
 ---
 
 ## **🛡️ ADVANCED ANTI-DETECTION SYSTEM**
@@ -547,6 +845,18 @@ class PerformanceMonitor {
             <span id="rangeValue">1000m</span>
         </div>
         
+        <div class="slider-container">
+            <label>Aimbot Smoothing</label>
+            <input type="range" id="aimbotSmoothing" min="0.1" max="2.0" value="0.8" step="0.1">
+            <span id="aimbotValue">0.8</span>
+        </div>
+        
+        <div class="slider-container">
+            <label>Noclip Speed</label>
+            <input type="range" id="noclipSpeed" min="1" max="5" value="2" step="0.1">
+            <span id="noclipValue">2.0x</span>
+        </div>
+        
         <button id="emergencyStop">🚨 Emergency Stop</button>
         <button id="saveConfig">💾 Save Config</button>
     </div>
@@ -755,7 +1065,9 @@ tribals-cheat-mod/
 │   │   ├── AutoFarm.js
 │   │   ├── ResourceHack.js
 │   │   ├── ESPVision.js
-│   │   └── SpeedHack.js
+│   │   ├── SpeedHack.js
+│   │   ├── AimbotSystem.js
+│   │   └── NoclipSystem.js
 │   ├── anti-detection/
 │   │   ├── Obfuscation.js
 │   │   ├── BehavioralMimicry.js
@@ -939,11 +1251,13 @@ class ErrorReporting {
 ## **🎯 FINAL DELIVERABLES**
 
 ### **1. Complete Source Code Package**
-- **Fully functional cheat mod** with all features
+- **Fully functional cheat mod** with all features including aimbot and noclip
 - **Modular architecture** for easy maintenance
 - **Comprehensive error handling** and logging
 - **Advanced anti-detection** systems
 - **Performance optimization** throughout
+- **Aimbot System**: Intelligent targeting with smooth aim and weapon-specific adjustments
+- **Noclip System**: Advanced collision bypass for base infiltration and loot collection
 
 ### **2. Documentation Suite**
 - **API Documentation**: Complete class and method references
@@ -977,7 +1291,7 @@ class ErrorReporting {
 
 ### **Phase 2: Core Development**
 1. Implement modular architecture foundation
-2. Develop core features (AutoFarm, ResourceHack, ESP, SpeedHack)
+2. Develop core features (AutoFarm, ResourceHack, ESP, SpeedHack, Aimbot, Noclip)
 3. Integrate advanced anti-detection systems
 4. Create comprehensive testing suite
 
@@ -1016,10 +1330,12 @@ class ErrorReporting {
 - ✅ **Support**: Comprehensive troubleshooting and help resources
 
 ### **Innovation**
-- ✅ **Advanced Features**: Beyond basic cheating capabilities
+- ✅ **Advanced Features**: Beyond basic cheating capabilities including aimbot and noclip
 - ✅ **Anti-Detection**: Cutting-edge stealth technology
 - ✅ **Performance**: Optimized for maximum efficiency
 - ✅ **Extensibility**: Easy to modify and extend
+- ✅ **Aimbot Intelligence**: AI-powered targeting with prediction and weapon-specific adjustments
+- ✅ **Noclip Mastery**: Advanced base infiltration and stealth navigation
 
 ---
 
