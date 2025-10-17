@@ -473,52 +473,116 @@
         
         document.body.appendChild(menu);
         
-        // Make menu draggable
+        // Make menu draggable with improved functionality
         let isDragging = false;
         let currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
         
-        menu.addEventListener('mousedown', dragStart);
+        // Add drag handle
+        const dragHandle = document.createElement('div');
+        dragHandle.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            cursor: move;
+            background: linear-gradient(90deg, #00ff00, #00cc00);
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            text-shadow: 0 0 5px #fff;
+            font-size: 12px;
+        `;
+        dragHandle.textContent = '🎮 DRAG TO MOVE';
+        
+        // Insert drag handle at the beginning
+        const menuContent = menu.querySelector('div');
+        menuContent.style.marginTop = '35px';
+        menuContent.insertBefore(dragHandle, menuContent.firstChild);
+        
+        // Drag functionality
+        dragHandle.addEventListener('mousedown', dragStart);
         document.addEventListener('mousemove', drag);
         document.addEventListener('mouseup', dragEnd);
         
+        // Touch support for mobile
+        dragHandle.addEventListener('touchstart', dragStart);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('touchend', dragEnd);
+        
         function dragStart(e) {
-            initialX = e.clientX - xOffset;
-            initialY = e.clientY - yOffset;
-            if (e.target === menu || menu.contains(e.target)) {
-                isDragging = true;
-                menu.style.cursor = 'grabbing';
+            e.preventDefault();
+            if (e.type === "touchstart") {
+                initialX = e.touches[0].clientX - xOffset;
+                initialY = e.touches[0].clientY - yOffset;
+            } else {
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
             }
+            
+            isDragging = true;
+            menu.style.cursor = 'grabbing';
+            dragHandle.style.cursor = 'grabbing';
         }
         
         function drag(e) {
             if (isDragging) {
                 e.preventDefault();
-                currentX = e.clientX - initialX;
-                currentY = e.clientY - initialY;
+                
+                if (e.type === "touchmove") {
+                    currentX = e.touches[0].clientX - initialX;
+                    currentY = e.touches[0].clientY - initialY;
+                } else {
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                }
+                
                 xOffset = currentX;
                 yOffset = currentY;
-                menu.style.transform = `translate(${currentX}px, ${currentY}px)`;
+                
+                // Keep menu within viewport
+                const rect = menu.getBoundingClientRect();
+                const maxX = window.innerWidth - rect.width;
+                const maxY = window.innerHeight - rect.height;
+                
+                const newX = Math.max(0, Math.min(currentX, maxX));
+                const newY = Math.max(0, Math.min(currentY, maxY));
+                
+                menu.style.transform = `translate(${newX}px, ${newY}px)`;
+                menu.style.left = '0';
+                menu.style.top = '0';
+                menu.style.right = 'auto';
             }
         }
         
         function dragEnd(e) {
+            e.preventDefault();
             initialX = currentX;
             initialY = currentY;
             isDragging = false;
             menu.style.cursor = 'move';
+            dragHandle.style.cursor = 'move';
         }
         
-        // Event listeners
+        // Event listeners - FIXED TO WORK WITH CHEAT INSTANCES
         document.getElementById('speedToggle').onclick = () => {
             cheatState.features.speedHack = !cheatState.features.speedHack;
             const btn = document.getElementById('speedToggle');
             btn.textContent = cheatState.features.speedHack ? 'Disable' : 'Enable';
             btn.style.background = cheatState.features.speedHack ? '#ff0000' : '#333';
             
-            if (cheatState.features.speedHack) {
-                cheatInstances.speedHack.enable();
+            // Actually call the cheat functions
+            if (window.cheatInstances && window.cheatInstances.speedHack) {
+                if (cheatState.features.speedHack) {
+                    window.cheatInstances.speedHack.enable();
+                } else {
+                    window.cheatInstances.speedHack.disable();
+                }
             } else {
-                cheatInstances.speedHack.disable();
+                console.log('⚠️ Speed hack instance not ready yet');
             }
         };
         
@@ -528,10 +592,15 @@
             btn.textContent = cheatState.features.weaponHack ? 'Disable' : 'Enable';
             btn.style.background = cheatState.features.weaponHack ? '#ff0000' : '#333';
             
-            if (cheatState.features.weaponHack) {
-                cheatInstances.weaponHack.enable();
+            // Actually call the cheat functions
+            if (window.cheatInstances && window.cheatInstances.weaponHack) {
+                if (cheatState.features.weaponHack) {
+                    window.cheatInstances.weaponHack.enable();
+                } else {
+                    window.cheatInstances.weaponHack.disable();
+                }
             } else {
-                cheatInstances.weaponHack.disable();
+                console.log('⚠️ Weapon hack instance not ready yet');
             }
         };
         
@@ -541,10 +610,15 @@
             btn.textContent = cheatState.features.collisionHack ? 'Disable' : 'Enable';
             btn.style.background = cheatState.features.collisionHack ? '#ff0000' : '#333';
             
-            if (cheatState.features.collisionHack) {
-                cheatInstances.collisionHack.enable();
+            // Actually call the cheat functions
+            if (window.cheatInstances && window.cheatInstances.collisionHack) {
+                if (cheatState.features.collisionHack) {
+                    window.cheatInstances.collisionHack.enable();
+                } else {
+                    window.cheatInstances.collisionHack.disable();
+                }
             } else {
-                cheatInstances.collisionHack.disable();
+                console.log('⚠️ Collision hack instance not ready yet');
             }
         };
         
@@ -554,7 +628,11 @@
             const z = parseFloat(document.getElementById('teleportZ').value);
             
             if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
-                cheatInstances.teleport.teleportTo(x, y, z);
+                if (window.cheatInstances && window.cheatInstances.teleport) {
+                    window.cheatInstances.teleport.teleportTo(x, y, z);
+                } else {
+                    console.log('⚠️ Teleport instance not ready yet');
+                }
             } else {
                 alert('Please enter valid coordinates!');
             }
