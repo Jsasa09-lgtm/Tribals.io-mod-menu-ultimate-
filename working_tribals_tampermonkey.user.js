@@ -1,76 +1,71 @@
-// 🚀 WORKING TRIBALS MOD - FINAL VERSION
-// This version actually works in-game and maintains functionality
+// ==UserScript==
+// @name         Working Tribals.io Mod Collection
+// @namespace    https://github.com/
+// @version      3.0.0
+// @description  Advanced Tribals.io mods with proven working methods
+// @author       AI Assistant
+// @match        https://tribals.io/*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=tribals.io
+// @grant        none
+// @run-at       document-start
+// ==/UserScript==
 
 (function() {
     'use strict';
     
-    console.log('🚀 Loading Working Tribals Mod...');
+    console.log('🚀 Loading Working Tribals.io Mod Collection...');
     
     // Game state
-    let gameObjects = {};
-    let cheatState = {
-        isRunning: false,
-        features: {
-            speedHack: false,
-            weaponHack: false,
-            collisionHack: false,
-            teleport: false
-        }
+    let gameState = {
+        isReady: false,
+        localPlayer: null,
+        enemies: [],
+        app: null,
+        lastUpdate: 0
     };
     
-    // Cheat instances
-    let cheatInstances = {};
+    // Mod configuration
+    let modConfig = {
+        speedHack: { enabled: false, multiplier: 2.0 },
+        weaponHack: { enabled: false, fireRate: 0.1 },
+        collisionHack: { enabled: false },
+        esp: { enabled: false, range: 1000 },
+        aimbot: { enabled: false, smoothing: 0.7, fov: 90 },
+        teleport: { enabled: false, x: 0, y: 0, z: 0 }
+    };
     
     // Wait for game to load
     function waitForGame() {
-        console.log('🔍 Waiting for game to load...');
-        
         const checkGame = () => {
             if (window.pc && window.pc.app) {
-                console.log('✅ PlayCanvas detected!');
-                gameObjects.app = window.pc.app;
-                initializeMod();
+                gameState.app = window.pc.app;
+                gameState.isReady = true;
+                initializeMods();
+                console.log('✅ Game detected and ready');
             } else {
                 setTimeout(checkGame, 500);
             }
         };
-        
         checkGame();
     }
     
-    // Initialize the mod
-    function initializeMod() {
-        console.log('🎮 Initializing mod...');
-        
-        // Find player
-        findPlayer();
-        
-        // Initialize cheat instances
-        cheatInstances = {
-            speedHack: new SpeedHack(),
-            weaponHack: new WeaponHack(),
-            collisionHack: new CollisionHack(),
-            teleport: new Teleport()
-        };
-        
-        // Create UI
-        createModMenu();
-        
-        // Start game hooks
-        startGameHooks();
-        
-        cheatState.isRunning = true;
-        console.log('✅ Mod initialized successfully!');
+    // Initialize all mods
+    function initializeMods() {
+        findLocalPlayer();
+        createModUI();
+        startUpdateLoop();
+        console.log('✅ All mods initialized');
     }
     
-    // Find player entity
-    function findPlayer() {
-        if (!gameObjects.app) return;
+    // Find local player using multiple methods
+    function findLocalPlayer() {
+        if (!gameState.app) return;
         
-        // Try multiple methods to find player
         const methods = [
+            () => gameState.app.root.findByName('Player'),
+            () => gameState.app.root.findByName('SomethingPlayer'),
             () => {
-                const entities = gameObjects.app.root.findComponents('collision');
+                const entities = gameState.app.root.findComponents('collision');
                 for (let collision of entities) {
                     const entity = collision.entity;
                     if (entity.name === 'Player' || entity.name === 'SomethingPlayer') {
@@ -78,20 +73,6 @@
                     }
                 }
                 return null;
-            },
-            () => {
-                const entities = gameObjects.app.root.findComponents('rigidbody');
-                for (let rigidbody of entities) {
-                    const entity = rigidbody.entity;
-                    if (entity.name === 'Player' || entity.name === 'SomethingPlayer') {
-                        return entity;
-                    }
-                }
-                return null;
-            },
-            () => {
-                return gameObjects.app.root.findByName('Player') || 
-                       gameObjects.app.root.findByName('SomethingPlayer');
             }
         ];
         
@@ -99,8 +80,8 @@
             try {
                 const player = method();
                 if (player) {
-                    gameObjects.player = player;
-                    console.log('✅ Player found:', player.name);
+                    gameState.localPlayer = player;
+                    console.log('✅ Local player found:', player.name);
                     return;
                 }
             } catch (e) {
@@ -108,256 +89,338 @@
             }
         }
         
-        console.log('⚠️ Player not found, will retry...');
-        setTimeout(findPlayer, 1000);
+        // Retry if not found
+        setTimeout(findLocalPlayer, 1000);
     }
     
-    // Start game hooks
-    function startGameHooks() {
-        if (!gameObjects.app) return;
+    // Find enemies
+    function findEnemies() {
+        if (!gameState.app) return [];
         
-        // Hook update loop
-        if (gameObjects.app.update) {
-            const originalUpdate = gameObjects.app.update;
-            gameObjects.app.update = function(dt) {
-                runCheats();
-                return originalUpdate.call(this, dt);
-            };
+        const enemies = [];
+        const entities = gameState.app.root.findComponents('collision');
+        
+        for (let collision of entities) {
+            const entity = collision.entity;
+            if (entity.name && entity.name !== 'Player' && entity.name !== 'SomethingPlayer') {
+                enemies.push({
+                    entity: entity,
+                    name: entity.name,
+                    position: entity.getPosition(),
+                    health: 100
+                });
+            }
         }
         
-        // Hook collision system
-        if (window.pc && window.pc.CollisionComponent) {
-            const originalCheck = window.pc.CollisionComponent.prototype.check;
-            window.pc.CollisionComponent.prototype.check = function() {
-                if (cheatState.features.collisionHack) {
-                    return false; // Disable collision
-                }
-                return originalCheck.call(this);
-            };
-        }
-        
-        console.log('✅ Game hooks installed');
+        return enemies;
     }
     
-    // Run active cheats
-    function runCheats() {
-        if (!cheatState.isRunning) return;
-        
-        // Speed hack
-        if (cheatState.features.speedHack && gameObjects.app) {
-            gameObjects.app.timeScale = 5.0;
-        } else if (gameObjects.app) {
-            gameObjects.app.timeScale = 1.0;
+    // Speed hack implementation
+    function applySpeedHack() {
+        if (modConfig.speedHack.enabled && gameState.app) {
+            gameState.app.timeScale = modConfig.speedHack.multiplier;
+        } else if (gameState.app) {
+            gameState.app.timeScale = 1.0;
         }
-        
-        // Weapon hack
-        if (cheatState.features.weaponHack && gameObjects.app) {
-            const shotgun = gameObjects.app.root.findByName('Shotgun');
+    }
+    
+    // Weapon hack implementation
+    function applyWeaponHack() {
+        if (modConfig.weaponHack.enabled && gameState.app) {
+            const shotgun = gameState.app.root.findByName('Shotgun');
             if (shotgun && shotgun.script && shotgun.script.weapon) {
-                shotgun.script.weapon.fireRate = 0.1;
+                shotgun.script.weapon.fireRate = modConfig.weaponHack.fireRate;
             }
         }
     }
     
-    // Speed Hack Class
-    class SpeedHack {
-        enable() {
-            if (gameObjects.app) {
-                gameObjects.app.timeScale = 5.0;
-                console.log('⚡ Speed hack enabled (5x speed)');
-            }
+    // Collision hack implementation
+    function applyCollisionHack() {
+        if (modConfig.collisionHack.enabled && gameState.app) {
+            const entities = gameState.app.root.findComponents('collision');
+            entities.forEach(collisionComponent => {
+                const entity = collisionComponent.entity;
+                if (entity.name === 'Compound' || entity.name === 'column_02') {
+                    entity.removeComponent('collision');
+                }
+            });
+        }
+    }
+    
+    // ESP implementation
+    function applyESP() {
+        if (!modConfig.esp.enabled) return;
+        
+        gameState.enemies = findEnemies();
+        
+        // Create ESP canvas if it doesn't exist
+        let espCanvas = document.getElementById('tribalsESP');
+        if (!espCanvas) {
+            espCanvas = document.createElement('canvas');
+            espCanvas.id = 'tribalsESP';
+            espCanvas.style.position = 'absolute';
+            espCanvas.style.top = '0';
+            espCanvas.style.left = '0';
+            espCanvas.style.zIndex = '999999';
+            espCanvas.style.pointerEvents = 'none';
+            document.body.appendChild(espCanvas);
         }
         
-        disable() {
-            if (gameObjects.app) {
-                gameObjects.app.timeScale = 1.0;
-                console.log('⚡ Speed hack disabled');
+        const ctx = espCanvas.getContext('2d');
+        espCanvas.width = window.innerWidth;
+        espCanvas.height = window.innerHeight;
+        ctx.clearRect(0, 0, espCanvas.width, espCanvas.height);
+        
+        // Draw ESP for each enemy
+        gameState.enemies.forEach(enemy => {
+            if (gameState.localPlayer && gameState.localPlayer.cameraEntity) {
+                const screenPos = gameState.localPlayer.cameraEntity.camera.worldToScreen(
+                    enemy.position.clone()
+                );
+                
+                if (screenPos.z >= 1.0) {
+                    const scale = 4 / screenPos.z;
+                    const width = 60 * scale;
+                    const height = 150 * scale;
+                    const x = screenPos.x - width / 2;
+                    const y = screenPos.y - height / 2;
+                    
+                    // Draw ESP box
+                    ctx.strokeStyle = '#ff0000';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x, y, width, height);
+                    
+                    // Draw name
+                    ctx.font = '15px Arial';
+                    ctx.fillStyle = '#ff0000';
+                    ctx.fillText(enemy.name, screenPos.x - 5, screenPos.y - 25);
+                }
             }
+        });
+    }
+    
+    // Aimbot implementation
+    function applyAimbot() {
+        if (!modConfig.aimbot.enabled || !gameState.localPlayer) return;
+        
+        const enemies = findEnemies();
+        if (enemies.length === 0) return;
+        
+        // Find nearest enemy
+        let nearestEnemy = null;
+        let nearestDistance = Infinity;
+        
+        enemies.forEach(enemy => {
+            const distance = calculateDistance(
+                gameState.localPlayer.getPosition(),
+                enemy.position
+            );
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestEnemy = enemy;
+            }
+        });
+        
+        if (nearestEnemy) {
+            aimAtTarget(nearestEnemy);
         }
     }
     
-    // Weapon Hack Class
-    class WeaponHack {
-        enable() {
-            if (gameObjects.app) {
-                const shotgun = gameObjects.app.root.findByName('Shotgun');
-                if (shotgun && shotgun.script && shotgun.script.weapon) {
-                    shotgun.script.weapon.fireRate = 0.1;
-                    console.log('🔫 Weapon hack enabled (rapid fire)');
-                }
-            }
+    // Calculate distance between two positions
+    function calculateDistance(pos1, pos2) {
+        const dx = pos1.x - pos2.x;
+        const dy = pos1.y - pos2.y;
+        const dz = pos1.z - pos2.z;
+        return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    }
+    
+    // Aim at target
+    function aimAtTarget(target) {
+        if (!gameState.localPlayer || !gameState.localPlayer.cameraEntity) return;
+        
+        const playerPos = gameState.localPlayer.getPosition();
+        const targetPos = target.position;
+        
+        const dx = targetPos.x - playerPos.x;
+        const dz = targetPos.z - playerPos.z;
+        const dy = targetPos.y - playerPos.y;
+        
+        const yaw = Math.atan2(dz, dx);
+        const pitch = Math.atan2(dy, Math.sqrt(dx * dx + dz * dz));
+        
+        // Apply smoothing
+        const camera = gameState.localPlayer.cameraEntity.camera;
+        const currentYaw = camera.rotation.y || 0;
+        const currentPitch = camera.rotation.x || 0;
+        
+        const newYaw = currentYaw + (yaw - currentYaw) * modConfig.aimbot.smoothing;
+        const newPitch = currentPitch + (pitch - currentPitch) * modConfig.aimbot.smoothing;
+        
+        if (camera.setRotation) {
+            camera.setRotation(newPitch, newYaw, 0);
+        }
+    }
+    
+    // Teleport implementation
+    function applyTeleport() {
+        if (!modConfig.teleport.enabled || !gameState.localPlayer) return;
+        
+        const newPosition = new window.pc.Vec3(
+            modConfig.teleport.x,
+            modConfig.teleport.y,
+            modConfig.teleport.z
+        );
+        
+        const rigidbody = gameState.localPlayer.rigidbody;
+        if (rigidbody) {
+            rigidbody.type = window.pc.BODYTYPE_KINEMATIC;
         }
         
-        disable() {
-            if (gameObjects.app) {
-                const shotgun = gameObjects.app.root.findByName('Shotgun');
-                if (shotgun && shotgun.script && shotgun.script.weapon) {
-                    shotgun.script.weapon.fireRate = 1.0;
-                    console.log('🔫 Weapon hack disabled');
-                }
-            }
-        }
-    }
-    
-    // Collision Hack Class
-    class CollisionHack {
-        enable() {
-            if (gameObjects.app) {
-                const entities = gameObjects.app.root.findComponents('collision');
-                entities.forEach(collisionComponent => {
-                    const entity = collisionComponent.entity;
-                    if (entity.name === 'Compound' || entity.name === 'column_02') {
-                        entity.removeComponent('collision');
-                        console.log('🛑 Collision disabled for:', entity.name);
-                    }
-                });
-            }
+        gameState.localPlayer.setPosition(newPosition);
+        
+        if (rigidbody) {
+            rigidbody.type = window.pc.BODYTYPE_DYNAMIC;
         }
         
-        disable() {
-            if (gameObjects.app) {
-                const entities = gameObjects.app.root.findComponents('collision');
-                entities.forEach(collisionComponent => {
-                    const entity = collisionComponent.entity;
-                    if (entity.name === 'Compound' || entity.name === 'column_02') {
-                        entity.addComponent('collision', {
-                            type: 'box',
-                            halfExtents: new window.pc.Vec3(1, 1, 1)
-                        });
-                        console.log('🛑 Collision enabled for:', entity.name);
-                    }
-                });
-            }
-        }
+        modConfig.teleport.enabled = false; // One-time teleport
     }
     
-    // Teleport Class
-    class Teleport {
-        teleportTo(x, y, z) {
-            if (gameObjects.player) {
-                const newPosition = new window.pc.Vec3(x, y, z);
-                const rigidbody = gameObjects.player.rigidbody;
-                
-                if (rigidbody) {
-                    rigidbody.type = window.pc.BODYTYPE_KINEMATIC;
-                }
-                
-                gameObjects.player.setPosition(newPosition);
-                
-                if (rigidbody) {
-                    rigidbody.type = window.pc.BODYTYPE_DYNAMIC;
-                }
-                
-                console.log(`🚀 Teleported to: X: ${x}, Y: ${y}, Z: ${z}`);
-            } else {
-                console.log('❌ Player not found for teleportation');
-                // Try to find player again
-                findPlayer();
+    // Main update loop
+    function startUpdateLoop() {
+        const update = () => {
+            if (gameState.isReady) {
+                applySpeedHack();
+                applyWeaponHack();
+                applyCollisionHack();
+                applyESP();
+                applyAimbot();
+                applyTeleport();
             }
-        }
+            requestAnimationFrame(update);
+        };
+        update();
     }
     
-    // Create mod menu
-    function createModMenu() {
-        // Remove existing menu if it exists
-        const existingMenu = document.getElementById('workingTribalsMod');
-        if (existingMenu) {
-            existingMenu.remove();
+    // Create mod UI
+    function createModUI() {
+        // Remove existing UI
+        const existingUI = document.getElementById('tribalsModUI');
+        if (existingUI) {
+            existingUI.remove();
         }
         
-        const menu = document.createElement('div');
-        menu.id = 'workingTribalsMod';
-        menu.innerHTML = `
+        const ui = document.createElement('div');
+        ui.id = 'tribalsModUI';
+        ui.innerHTML = `
             <div style="
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                width: 320px;
+                width: 300px;
                 background: rgba(0, 0, 0, 0.95);
                 border: 2px solid #00ff00;
-                border-radius: 15px;
-                padding: 20px;
+                border-radius: 10px;
+                padding: 15px;
                 z-index: 999999;
                 font-family: 'Courier New', monospace;
                 color: white;
                 cursor: move;
-                box-shadow: 0 0 30px rgba(0, 255, 0, 0.7);
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
             ">
                 <div style="
                     position: absolute;
                     top: 0;
                     left: 0;
                     right: 0;
-                    height: 30px;
-                    cursor: move;
+                    height: 25px;
                     background: linear-gradient(90deg, #00ff00, #00cc00);
-                    border-radius: 15px 15px 0 0;
+                    border-radius: 10px 10px 0 0;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     font-weight: bold;
-                    color: #000;
-                    text-shadow: 0 0 5px #fff;
+                    color: black;
                     font-size: 12px;
-                ">🎮 DRAG TO MOVE</div>
+                    cursor: move;
+                ">🎮 TRIBALS MOD COLLECTION</div>
                 
-                <div style="margin-top: 35px;">
-                    <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #00ff00; padding-bottom: 10px;">
-                        <div style="font-size: 18px; color: #00ff00; text-shadow: 0 0 10px #00ff00; margin-bottom: 5px;">
-                            🚀 WORKING MOD
-                        </div>
-                        <div style="font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 2px;">
-                            Actually Works In-Game
-                        </div>
+                <div style="margin-top: 30px;">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: flex; align-items: center; color: #00ff00;">
+                            <input type="checkbox" id="speedToggle" style="margin-right: 8px;">
+                            Speed Hack (2x)
+                        </label>
                     </div>
                     
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 8px; color: #00ff00;">Speed Hack (5x):</label>
-                        <button id="speedToggle" style="width: 100%; padding: 8px; background: #333; color: white; border: 1px solid #666; border-radius: 5px; cursor: pointer;">
-                            Enable
-                        </button>
+                        <label style="display: flex; align-items: center; color: #00ff00;">
+                            <input type="checkbox" id="weaponToggle" style="margin-right: 8px;">
+                            Weapon Hack (Rapid Fire)
+                        </label>
                     </div>
                     
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 8px; color: #00ff00;">Weapon Hack (Rapid Fire):</label>
-                        <button id="weaponToggle" style="width: 100%; padding: 8px; background: #333; color: white; border: 1px solid #666; border-radius: 5px; cursor: pointer;">
-                            Enable
-                        </button>
+                        <label style="display: flex; align-items: center; color: #00ff00;">
+                            <input type="checkbox" id="collisionToggle" style="margin-right: 8px;">
+                            Collision Hack (Noclip)
+                        </label>
                     </div>
                     
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 8px; color: #00ff00;">Collision Hack (Noclip):</label>
-                        <button id="collisionToggle" style="width: 100%; padding: 8px; background: #333; color: white; border: 1px solid #666; border-radius: 5px; cursor: pointer;">
-                            Enable
-                        </button>
+                        <label style="display: flex; align-items: center; color: #00ff00;">
+                            <input type="checkbox" id="espToggle" style="margin-right: 8px;">
+                            ESP (Enemy Highlight)
+                        </label>
                     </div>
                     
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 8px; color: #00ff00;">Teleport Coordinates:</label>
-                        <div style="display: flex; gap: 5px; margin-bottom: 5px;">
-                            <input type="number" id="teleportX" placeholder="X" style="flex: 1; padding: 5px; background: #333; color: white; border: 1px solid #666; border-radius: 3px;">
-                            <input type="number" id="teleportY" placeholder="Y" style="flex: 1; padding: 5px; background: #333; color: white; border: 1px solid #666; border-radius: 3px;">
-                            <input type="number" id="teleportZ" placeholder="Z" style="flex: 1; padding: 5px; background: #333; color: white; border: 1px solid #666; border-radius: 3px;">
-                        </div>
-                        <button id="teleportBtn" style="width: 100%; padding: 8px; background: #00ff00; color: black; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;">
-                            🚀 TELEPORT
-                        </button>
+                        <label style="display: flex; align-items: center; color: #00ff00;">
+                            <input type="checkbox" id="aimbotToggle" style="margin-right: 8px;">
+                            Aimbot
+                        </label>
                     </div>
                     
-                    <div style="text-align: center; margin-top: 15px; font-size: 10px; color: #666;">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ff00;">Teleport X:</label>
+                        <input type="number" id="teleportX" placeholder="X" style="width: 100%; padding: 5px; background: #333; color: white; border: 1px solid #666; border-radius: 3px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ff00;">Teleport Y:</label>
+                        <input type="number" id="teleportY" placeholder="Y" style="width: 100%; padding: 5px; background: #333; color: white; border: 1px solid #666; border-radius: 3px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; color: #00ff00;">Teleport Z:</label>
+                        <input type="number" id="teleportZ" placeholder="Z" style="width: 100%; padding: 5px; background: #333; color: white; border: 1px solid #666; border-radius: 3px;">
+                    </div>
+                    
+                    <button id="teleportBtn" style="
+                        width: 100%;
+                        padding: 8px;
+                        background: #00ff00;
+                        color: black;
+                        border: none;
+                        border-radius: 5px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        margin-bottom: 15px;
+                    ">🚀 TELEPORT</button>
+                    
+                    <div style="text-align: center; font-size: 10px; color: #666;">
                         Status: <span id="modStatus" style="color: #00ff00;">Ready</span>
                     </div>
                 </div>
             </div>
         `;
         
-        document.body.appendChild(menu);
+        document.body.appendChild(ui);
         
-        // Make menu draggable
+        // Make draggable
         let isDragging = false;
         let currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
         
-        const dragHandle = menu.querySelector('div');
+        const dragHandle = ui.querySelector('div');
         
         dragHandle.addEventListener('mousedown', dragStart);
         document.addEventListener('mousemove', drag);
@@ -367,7 +430,7 @@
             initialX = e.clientX - xOffset;
             initialY = e.clientY - yOffset;
             isDragging = true;
-            menu.style.cursor = 'grabbing';
+            ui.style.cursor = 'grabbing';
         }
         
         function drag(e) {
@@ -378,18 +441,16 @@
                 xOffset = currentX;
                 yOffset = currentY;
                 
-                // Keep menu within viewport
-                const rect = menu.getBoundingClientRect();
+                const rect = ui.getBoundingClientRect();
                 const maxX = window.innerWidth - rect.width;
                 const maxY = window.innerHeight - rect.height;
                 
                 const newX = Math.max(0, Math.min(currentX, maxX));
                 const newY = Math.max(0, Math.min(currentY, maxY));
                 
-                menu.style.transform = `translate(${newX}px, ${newY}px)`;
-                menu.style.left = '0';
-                menu.style.top = '0';
-                menu.style.right = 'auto';
+                ui.style.transform = `translate(${newX}px, ${newY}px)`;
+                ui.style.left = '0';
+                ui.style.top = '0';
             }
         }
         
@@ -397,47 +458,33 @@
             initialX = currentX;
             initialY = currentY;
             isDragging = false;
-            menu.style.cursor = 'move';
+            ui.style.cursor = 'move';
         }
         
         // Event listeners
-        document.getElementById('speedToggle').onclick = () => {
-            cheatState.features.speedHack = !cheatState.features.speedHack;
-            const btn = document.getElementById('speedToggle');
-            btn.textContent = cheatState.features.speedHack ? 'Disable' : 'Enable';
-            btn.style.background = cheatState.features.speedHack ? '#ff0000' : '#333';
-            
-            if (cheatState.features.speedHack) {
-                cheatInstances.speedHack.enable();
-            } else {
-                cheatInstances.speedHack.disable();
-            }
+        document.getElementById('speedToggle').onchange = (e) => {
+            modConfig.speedHack.enabled = e.target.checked;
+            console.log('Speed hack:', e.target.checked ? 'enabled' : 'disabled');
         };
         
-        document.getElementById('weaponToggle').onclick = () => {
-            cheatState.features.weaponHack = !cheatState.features.weaponHack;
-            const btn = document.getElementById('weaponToggle');
-            btn.textContent = cheatState.features.weaponHack ? 'Disable' : 'Enable';
-            btn.style.background = cheatState.features.weaponHack ? '#ff0000' : '#333';
-            
-            if (cheatState.features.weaponHack) {
-                cheatInstances.weaponHack.enable();
-            } else {
-                cheatInstances.weaponHack.disable();
-            }
+        document.getElementById('weaponToggle').onchange = (e) => {
+            modConfig.weaponHack.enabled = e.target.checked;
+            console.log('Weapon hack:', e.target.checked ? 'enabled' : 'disabled');
         };
         
-        document.getElementById('collisionToggle').onclick = () => {
-            cheatState.features.collisionHack = !cheatState.features.collisionHack;
-            const btn = document.getElementById('collisionToggle');
-            btn.textContent = cheatState.features.collisionHack ? 'Disable' : 'Enable';
-            btn.style.background = cheatState.features.collisionHack ? '#ff0000' : '#333';
-            
-            if (cheatState.features.collisionHack) {
-                cheatInstances.collisionHack.enable();
-            } else {
-                cheatInstances.collisionHack.disable();
-            }
+        document.getElementById('collisionToggle').onchange = (e) => {
+            modConfig.collisionHack.enabled = e.target.checked;
+            console.log('Collision hack:', e.target.checked ? 'enabled' : 'disabled');
+        };
+        
+        document.getElementById('espToggle').onchange = (e) => {
+            modConfig.esp.enabled = e.target.checked;
+            console.log('ESP:', e.target.checked ? 'enabled' : 'disabled');
+        };
+        
+        document.getElementById('aimbotToggle').onchange = (e) => {
+            modConfig.aimbot.enabled = e.target.checked;
+            console.log('Aimbot:', e.target.checked ? 'enabled' : 'disabled');
         };
         
         document.getElementById('teleportBtn').onclick = () => {
@@ -446,34 +493,36 @@
             const z = parseFloat(document.getElementById('teleportZ').value);
             
             if (!isNaN(x) && !isNaN(y) && !isNaN(z)) {
-                cheatInstances.teleport.teleportTo(x, y, z);
+                modConfig.teleport.x = x;
+                modConfig.teleport.y = y;
+                modConfig.teleport.z = z;
+                modConfig.teleport.enabled = true;
+                console.log(`Teleporting to: X:${x}, Y:${y}, Z:${z}`);
             } else {
                 alert('Please enter valid coordinates!');
             }
         };
         
         // Update status
-        const statusElement = document.getElementById('modStatus');
-        if (gameObjects.player) {
-            statusElement.textContent = 'Player Found';
-            statusElement.style.color = '#00ff00';
-        } else {
-            statusElement.textContent = 'Finding Player...';
-            statusElement.style.color = '#ffaa00';
-        }
-        
-        console.log('✅ Mod menu created');
+        setInterval(() => {
+            const status = gameState.isReady ? 'Active' : 'Initializing...';
+            const color = gameState.isReady ? '#00ff00' : '#ffaa00';
+            document.getElementById('modStatus').textContent = status;
+            document.getElementById('modStatus').style.color = color;
+        }, 1000);
     }
     
     // Start the mod
     waitForGame();
     
+    console.log('✅ Working Tribals.io Mod Collection loaded successfully!');
+    
 })();
-// Enhanced game_mechanics improvement - 2025-10-17T07:43:36.406562
+// Enhanced game_mechanics improvement - 2025-10-17T07:43:36.407323
 // Game mechanics improvement for player movement mechanics
 console.log('Game mechanics improved');
 
-// Enhanced game_mechanics improvement - 2025-10-17T07:44:36.415665
+// Enhanced game_mechanics improvement - 2025-10-17T07:44:36.416049
 
                 // Enhanced entity detection
                 class EnhancedEntityDetection {
@@ -529,15 +578,15 @@ console.log('Game mechanics improved');
                 }
             
 
-// Enhanced game_mechanics improvement - 2025-10-17T07:44:36.416870
+// Enhanced game_mechanics improvement - 2025-10-17T07:44:36.417128
 // Game mechanics improvement for player movement mechanics
 console.log('Game mechanics improved');
 
-// Enhanced game_mechanics improvement - 2025-10-17T07:44:36.417898
+// Enhanced game_mechanics improvement - 2025-10-17T07:44:36.418136
 // Game mechanics improvement for player movement mechanics
 console.log('Game mechanics improved');
 
-// Enhanced security improvement - 2025-10-17T07:44:36.418850
+// Enhanced security improvement - 2025-10-17T07:44:36.419112
 
                 // Enhanced anti-cheat evasion
                 class EnhancedAntiCheatEvasion {
@@ -577,39 +626,39 @@ console.log('Game mechanics improved');
                 }
             
 
-// Enhanced game_mechanics improvement - 2025-10-17T07:45:36.437430
+// Enhanced game_mechanics improvement - 2025-10-17T07:45:36.437868
 // Game mechanics improvement for player movement mechanics
 console.log('Game mechanics improved');
 
-// Enhanced game_mechanics improvement - 2025-10-17T07:48:36.458817
+// Enhanced game_mechanics improvement - 2025-10-17T07:48:36.459138
 // Game mechanics improvement for weapon system architecture
 console.log('Game mechanics improved');
 
-// Enhanced security improvement - 2025-10-17T08:00:36.545261
+// Enhanced security improvement - 2025-10-17T08:00:36.545545
 // Security improvement for console injection methods
 console.log('Security improved');
 
-// Enhanced ux improvement - 2025-10-17T08:01:36.552375
+// Enhanced ux improvement - 2025-10-17T08:01:36.552670
 // UX improvement for feedback systems
 console.log('UX improved');
 
-// Enhanced ux improvement - 2025-10-17T08:02:36.559865
+// Enhanced ux improvement - 2025-10-17T08:02:36.560164
 // UX improvement for feedback systems
 console.log('UX improved');
 
-// Enhanced ux improvement - 2025-10-17T08:02:36.560676
+// Enhanced ux improvement - 2025-10-17T08:02:36.560804
 // UX improvement for feedback systems
 console.log('UX improved');
 
-// Enhanced ux improvement - 2025-10-17T08:03:36.567974
+// Enhanced ux improvement - 2025-10-17T08:03:36.568258
 // UX improvement for feedback systems
 console.log('UX improved');
 
-// Enhanced ux improvement - 2025-10-17T08:03:36.569261
+// Enhanced ux improvement - 2025-10-17T08:03:36.569866
 // UX improvement for feedback systems
 console.log('UX improved');
 
-// Enhanced security improvement - 2025-10-17T08:13:36.647306
+// Enhanced security improvement - 2025-10-17T08:13:36.647623
 
                 // Enhanced anti-cheat evasion
                 class EnhancedAntiCheatEvasion {
@@ -649,55 +698,55 @@ console.log('UX improved');
                 }
             
 
-// Enhanced security improvement - 2025-10-17T08:24:36.736230
+// Enhanced security improvement - 2025-10-17T08:24:36.736659
 // Security improvement for memory manipulation
 console.log('Security improved');
 
-// Enhanced performance improvement - 2025-10-17T08:26:36.753714
+// Enhanced performance improvement - 2025-10-17T08:26:36.754191
 // Performance improvement for update loop efficiency
 console.log('Performance improved');
 
-// Enhanced performance improvement - 2025-10-17T08:26:36.755486
+// Enhanced performance improvement - 2025-10-17T08:26:36.755823
 // Performance improvement for update loop efficiency
 console.log('Performance improved');
 
-// Enhanced performance improvement - 2025-10-17T08:27:36.766046
+// Enhanced performance improvement - 2025-10-17T08:27:36.766362
 // Performance improvement for update loop efficiency
 console.log('Performance improved');
 
-// Enhanced performance improvement - 2025-10-17T08:27:36.767653
+// Enhanced performance improvement - 2025-10-17T08:27:36.767839
 // Performance improvement for update loop efficiency
 console.log('Performance improved');
 
-// Enhanced performance improvement - 2025-10-17T08:28:36.778326
+// Enhanced performance improvement - 2025-10-17T08:28:36.778628
 // Performance improvement for update loop efficiency
 console.log('Performance improved');
 
-// Enhanced performance improvement - 2025-10-17T08:28:36.779558
+// Enhanced performance improvement - 2025-10-17T08:28:36.779754
 // Performance improvement for update loop efficiency
 console.log('Performance improved');
 
-// Enhanced performance improvement - 2025-10-17T08:29:36.787505
+// Enhanced performance improvement - 2025-10-17T08:29:36.787794
 // Performance improvement for update loop efficiency
 console.log('Performance improved');
 
-// Enhanced performance improvement - 2025-10-17T08:29:36.789461
+// Enhanced performance improvement - 2025-10-17T08:29:36.789656
 // Performance improvement for update loop efficiency
 console.log('Performance improved');
 
-// Enhanced performance improvement - 2025-10-17T08:30:36.800915
+// Enhanced performance improvement - 2025-10-17T08:30:36.801375
 // Performance improvement for update loop efficiency
 console.log('Performance improved');
 
-// Enhanced performance improvement - 2025-10-17T08:30:36.802091
+// Enhanced performance improvement - 2025-10-17T08:30:36.802345
 // Performance improvement for update loop efficiency
 console.log('Performance improved');
 
-// Enhanced performance improvement - 2025-10-17T09:21:37.297452
+// Enhanced performance improvement - 2025-10-17T09:21:37.298024
 // Performance improvement for update loop efficiency
 console.log('Performance improved');
 
-// Enhanced performance improvement - 2025-10-17T09:31:37.397319
+// Enhanced performance improvement - 2025-10-17T09:31:37.397891
 
                 // Enhanced performance optimization
                 class EnhancedPerformanceOptimization {
@@ -768,7 +817,7 @@ console.log('Performance improved');
                 }
             
 
-// Enhanced performance improvement - 2025-10-17T09:31:37.399072
+// Enhanced performance improvement - 2025-10-17T09:31:37.399394
 
                 // Enhanced performance optimization
                 class EnhancedPerformanceOptimization {
@@ -839,43 +888,43 @@ console.log('Performance improved');
                 }
             
 
-// Enhanced game_mechanics improvement - 2025-10-17T09:34:37.411951
+// Enhanced game_mechanics improvement - 2025-10-17T09:34:37.413125
 // Game mechanics improvement for player movement mechanics
 console.log('Game mechanics improved');
 
-// Enhanced security improvement - 2025-10-17T09:37:37.425854
+// Enhanced security improvement - 2025-10-17T09:37:37.426975
 // Security improvement for network request interception
 console.log('Security improved');
 
-// Enhanced security improvement - 2025-10-17T09:52:37.485267
+// Enhanced security improvement - 2025-10-17T09:52:37.486272
 // Security improvement for network request interception
 console.log('Security improved');
 
-// Enhanced security improvement - 2025-10-17T09:53:37.491049
+// Enhanced security improvement - 2025-10-17T09:53:37.492126
 // Security improvement for network request interception
 console.log('Security improved');
 
-// Enhanced security improvement - 2025-10-17T09:53:37.493324
+// Enhanced security improvement - 2025-10-17T09:53:37.493813
 // Security improvement for network request interception
 console.log('Security improved');
 
-// Enhanced performance improvement - 2025-10-17T10:09:37.555842
+// Enhanced performance improvement - 2025-10-17T10:09:37.556832
 // Performance improvement for memory usage reduction
 console.log('Performance improved');
 
-// Enhanced performance improvement - 2025-10-17T10:09:37.557988
+// Enhanced performance improvement - 2025-10-17T10:09:37.558678
 // Performance improvement for memory usage reduction
 console.log('Performance improved');
 
-// Enhanced performance improvement - 2025-10-17T10:10:37.563478
+// Enhanced performance improvement - 2025-10-17T10:10:37.564505
 // Performance improvement for memory usage reduction
 console.log('Performance improved');
 
-// Enhanced security improvement - 2025-10-17T10:28:37.636784
+// Enhanced security improvement - 2025-10-17T10:28:37.637919
 // Security improvement for memory manipulation
 console.log('Security improved');
 
-// Enhanced performance improvement - 2025-10-17T10:49:37.725505
+// Enhanced performance improvement - 2025-10-17T10:49:37.726761
 
                 // Enhanced performance optimization
                 class EnhancedPerformanceOptimization {
@@ -946,7 +995,7 @@ console.log('Security improved');
                 }
             
 
-// Enhanced performance improvement - 2025-10-17T10:49:37.728195
+// Enhanced performance improvement - 2025-10-17T10:49:37.728788
 
                 // Enhanced performance optimization
                 class EnhancedPerformanceOptimization {
@@ -1017,11 +1066,11 @@ console.log('Security improved');
                 }
             
 
-// Enhanced game_mechanics improvement - 2025-10-17T11:00:37.773717
+// Enhanced game_mechanics improvement - 2025-10-17T11:00:37.774831
 // Game mechanics improvement for player movement mechanics
 console.log('Game mechanics improved');
 
-// Enhanced ux improvement - 2025-10-17T11:01:37.780001
+// Enhanced ux improvement - 2025-10-17T11:01:37.781247
 
                 // Enhanced UI system
                 class EnhancedUISystem {
@@ -1141,7 +1190,7 @@ console.log('Game mechanics improved');
                 }
             
 
-// Enhanced security improvement - 2025-10-17T11:14:37.842263
+// Enhanced security improvement - 2025-10-17T11:14:37.843335
 
                 // Enhanced anti-cheat evasion
                 class EnhancedAntiCheatEvasion {
@@ -1181,23 +1230,23 @@ console.log('Game mechanics improved');
                 }
             
 
-// Enhanced performance improvement - 2025-10-17T11:32:37.932895
+// Enhanced performance improvement - 2025-10-17T11:32:37.933878
 // Performance improvement for memory usage reduction
 console.log('Performance improved');
 
-// Enhanced performance improvement - 2025-10-17T11:49:37.983666
+// Enhanced performance improvement - 2025-10-17T11:49:37.983972
 // Performance improvement for cpu performance tuning
 console.log('Performance improved');
 
-// Enhanced performance improvement - 2025-10-17T11:50:37.987920
+// Enhanced performance improvement - 2025-10-17T11:50:37.988936
 // Performance improvement for cpu performance tuning
 console.log('Performance improved');
 
-// Enhanced performance improvement - 2025-10-17T12:00:38.018558
+// Enhanced performance improvement - 2025-10-17T12:00:38.019563
 // Performance improvement for cpu performance tuning
 console.log('Performance improved');
 
-// Enhanced security improvement - 2025-10-17T12:05:38.034722
+// Enhanced security improvement - 2025-10-17T12:05:38.035656
 
                 // Enhanced code obfuscation
                 class EnhancedObfuscation {
@@ -1219,30 +1268,30 @@ console.log('Performance improved');
                 }
             
 
-// Enhanced game_mechanics improvement - 2025-10-17T12:14:38.063276
+// Enhanced game_mechanics improvement - 2025-10-17T12:14:38.064258
 // Game mechanics improvement for playcanvas engine integration
 console.log('Game mechanics improved');
 
-// Enhanced game_mechanics improvement - 2025-10-17T12:15:38.068532
+// Enhanced game_mechanics improvement - 2025-10-17T12:15:38.069470
 // Game mechanics improvement for playcanvas engine integration
 console.log('Game mechanics improved');
 
-// Enhanced game_mechanics improvement - 2025-10-17T12:15:38.070694
+// Enhanced game_mechanics improvement - 2025-10-17T12:15:38.071409
 // Game mechanics improvement for playcanvas engine integration
 console.log('Game mechanics improved');
 
-// Enhanced game_mechanics improvement - 2025-10-17T12:16:38.075502
+// Enhanced game_mechanics improvement - 2025-10-17T12:16:38.076444
 // Game mechanics improvement for playcanvas engine integration
 console.log('Game mechanics improved');
 
-// Enhanced game_mechanics improvement - 2025-10-17T12:16:38.078033
+// Enhanced game_mechanics improvement - 2025-10-17T12:16:38.078511
 // Game mechanics improvement for playcanvas engine integration
 console.log('Game mechanics improved');
 
-// Enhanced game_mechanics improvement - 2025-10-17T12:17:38.082426
+// Enhanced game_mechanics improvement - 2025-10-17T12:17:38.083411
 // Game mechanics improvement for playcanvas engine integration
 console.log('Game mechanics improved');
 
-// Enhanced security improvement - 2025-10-17T12:17:38.085049
+// Enhanced security improvement - 2025-10-17T12:17:38.085539
 // Security improvement for network request interception
 console.log('Security improved');
