@@ -67,10 +67,39 @@
             console.log('🔍 Starting Ultimate Game Detection...');
             this.isDetecting = true;
             
-            // Wait for PlayCanvas to load
-            this.waitForPlayCanvas().then(() => {
+            // Wait for DOM and PlayCanvas to load
+            this.waitForDOMAndPlayCanvas().then(() => {
                 this.detectGameObjects();
                 this.startContinuousDetection();
+            });
+        }
+        
+        // Wait for DOM and PlayCanvas to load
+        waitForDOMAndPlayCanvas() {
+            return new Promise((resolve) => {
+                // First wait for DOM
+                const waitForDOM = () => {
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', waitForPlayCanvas);
+                    } else {
+                        waitForPlayCanvas();
+                    }
+                };
+                
+                // Then wait for PlayCanvas
+                const waitForPlayCanvas = () => {
+                    const checkPlayCanvas = () => {
+                        if (window.pc && window.pc.app) {
+                            console.log('✅ DOM and PlayCanvas engine loaded');
+                            resolve();
+                        } else {
+                            setTimeout(checkPlayCanvas, 100);
+                        }
+                    };
+                    checkPlayCanvas();
+                };
+                
+                waitForDOM();
             });
         }
         
@@ -557,6 +586,21 @@
                     return false;
                 }
             });
+            
+            // Override DOMContentLoaded to ensure our mod loads first
+            const originalDOMContentLoaded = document.readyState;
+            Object.defineProperty(document, 'readyState', {
+                get: function() {
+                    return 'complete';
+                },
+                configurable: true
+            });
+            
+            // Force trigger DOMContentLoaded if not already triggered
+            if (document.readyState === 'loading') {
+                const event = new Event('DOMContentLoaded');
+                document.dispatchEvent(event);
+            }
             
             console.log('✅ Game loading protection bypassed');
         }
@@ -1977,11 +2021,93 @@
         console.log('✅ All cheats disabled safely');
     }
     
+    // Setup movable menu
+    function setupMovableMenu() {
+        const menu = document.getElementById('ultimateTribalsMod1000x');
+        const dragHandle = document.getElementById('dragHandle');
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        let xOffset = 0;
+        let yOffset = 0;
+        
+        // Mouse down on drag handle
+        dragHandle.addEventListener('mousedown', dragStart);
+        
+        // Mouse move
+        document.addEventListener('mousemove', drag);
+        
+        // Mouse up
+        document.addEventListener('mouseup', dragEnd);
+        
+        // Touch events for mobile
+        dragHandle.addEventListener('touchstart', dragStart);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('touchend', dragEnd);
+        
+        function dragStart(e) {
+            if (e.type === "touchstart") {
+                initialX = e.touches[0].clientX - xOffset;
+                initialY = e.touches[0].clientY - yOffset;
+            } else {
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+            }
+            
+            if (e.target === dragHandle || dragHandle.contains(e.target)) {
+                isDragging = true;
+                menu.style.cursor = 'grabbing';
+                dragHandle.style.cursor = 'grabbing';
+            }
+        }
+        
+        function drag(e) {
+            if (isDragging) {
+                e.preventDefault();
+                
+                if (e.type === "touchmove") {
+                    currentX = e.touches[0].clientX - initialX;
+                    currentY = e.touches[0].clientY - initialY;
+                } else {
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                }
+                
+                xOffset = currentX;
+                yOffset = currentY;
+                
+                // Keep menu within viewport
+                const rect = menu.getBoundingClientRect();
+                const maxX = window.innerWidth - rect.width;
+                const maxY = window.innerHeight - rect.height;
+                
+                const newX = Math.max(0, Math.min(currentX, maxX));
+                const newY = Math.max(0, Math.min(currentY, maxY));
+                
+                menu.style.transform = `translate(${newX}px, ${newY}px)`;
+                menu.style.left = '0';
+                menu.style.top = '0';
+                menu.style.right = 'auto';
+            }
+        }
+        
+        function dragEnd(e) {
+            initialX = currentX;
+            initialY = currentY;
+            isDragging = false;
+            menu.style.cursor = 'move';
+            dragHandle.style.cursor = 'move';
+        }
+    }
+    
     // Toggle minimize
     function toggleMinimize() {
         const menu = document.getElementById('ultimateTribalsMod1000x');
         const content = document.getElementById('modContent');
         const btn = document.getElementById('minimizeBtn');
+        const dragHandle = document.getElementById('dragHandle');
         
         cheatState.isMinimized = !cheatState.isMinimized;
         
@@ -1990,17 +2116,21 @@
             menu.style.height = '60px';
             menu.style.padding = '0';
             content.style.display = 'none';
+            dragHandle.style.display = 'none';
             btn.style.position = 'static';
             btn.style.width = '100%';
             btn.style.height = '100%';
+            btn.textContent = '+';
         } else {
             menu.style.width = '350px';
             menu.style.height = 'auto';
             menu.style.padding = '20px';
             content.style.display = 'block';
+            dragHandle.style.display = 'flex';
             btn.style.position = 'absolute';
-            btn.style.width = '30px';
-            btn.style.height = '30px';
+            btn.style.width = '25px';
+            btn.style.height = '25px';
+            btn.textContent = '−';
         }
     }
     
@@ -2028,37 +2158,108 @@
     function initializeUltimateSystem() {
         console.log('🚀 Initializing Ultimate System...');
         
-        // Initialize enterprise architecture
-        ULTIMATE_ARCHITECTURE.initialize();
+        // Wait for everything to be ready
+        const initializeWhenReady = () => {
+            // Initialize enterprise architecture
+            ULTIMATE_ARCHITECTURE.initialize();
+            
+            // Initialize CORS bypass
+            ULTIMATE_ARCHITECTURE.coreServices.corsBypass.initialize();
+            
+            // Start game detection
+            ULTIMATE_ARCHITECTURE.coreServices.gameDetection.startDetection();
+            
+            // Wait for game objects to be detected
+            const waitForGameObjects = () => {
+                const gameObjects = ULTIMATE_ARCHITECTURE.coreServices.gameDetection.getGameObjects();
+                
+                if (gameObjects && gameObjects.app) {
+                    // Initialize cheat engine
+                    ULTIMATE_ARCHITECTURE.coreServices.cheatEngine.initialize(gameObjects);
+                    
+                    // Hook into game functions
+                    ULTIMATE_ARCHITECTURE.coreServices.hookingSystem.hookGameFunctions();
+                    
+                    // Start monitoring
+                    ULTIMATE_ARCHITECTURE.coreServices.monitoring.start();
+                    
+                    cheatState.isRunning = true;
+                    console.log('✅ Ultimate System initialized successfully');
+                } else {
+                    // Retry in 500ms
+                    setTimeout(waitForGameObjects, 500);
+                }
+            };
+            
+            waitForGameObjects();
+        };
         
-        // Initialize CORS bypass
-        ULTIMATE_ARCHITECTURE.coreServices.corsBypass.initialize();
-        
-        // Start game detection
-        ULTIMATE_ARCHITECTURE.coreServices.gameDetection.startDetection();
-        
-        // Wait for game objects to be detected
-        setTimeout(() => {
-            const gameObjects = ULTIMATE_ARCHITECTURE.coreServices.gameDetection.getGameObjects();
-            
-            // Initialize cheat engine
-            ULTIMATE_ARCHITECTURE.coreServices.cheatEngine.initialize(gameObjects);
-            
-            // Hook into game functions
-            ULTIMATE_ARCHITECTURE.coreServices.hookingSystem.hookGameFunctions();
-            
-            // Start monitoring
-            ULTIMATE_ARCHITECTURE.coreServices.monitoring.start();
-            
-            cheatState.isRunning = true;
-            console.log('✅ Ultimate System initialized successfully');
-        }, 2000);
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeWhenReady);
+        } else {
+            // DOM is already ready, wait a bit for game to load
+            setTimeout(initializeWhenReady, 1000);
+        }
     }
     
     // Mark as loaded
     window.ultimateTribalsMod1000x = true;
     
-    // Create the ultimate mod menu
-    createUltimateModMenu();
+    // Wait for DOM to be ready
+    function waitForDOM() {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', createUltimateModMenu);
+        } else {
+            createUltimateModMenu();
+        }
+    }
+    
+    // Immediate initialization for maximum security
+    console.log('🛡️ Ultimate Tribals Mod 1000x - Initializing Security Bypass...');
+    
+    // Bypass game protection immediately
+    (function() {
+        // Block game scripts immediately
+        const originalCreateElement = document.createElement;
+        document.createElement = function(tagName) {
+            const element = originalCreateElement.call(this, tagName);
+            if (tagName.toLowerCase() === 'script') {
+                const originalSrc = Object.getOwnPropertyDescriptor(element, 'src');
+                Object.defineProperty(element, 'src', {
+                    get: function() {
+                        return originalSrc ? originalSrc.get.call(this) : this.getAttribute('src');
+                    },
+                    set: function(value) {
+                        if (value && value.includes('_game-scripts.js')) {
+                            console.log('🛡️ Blocked game scripts:', value);
+                            return;
+                        }
+                        if (originalSrc) {
+                            originalSrc.set.call(this, value);
+                        } else {
+                            this.setAttribute('src', value);
+                        }
+                    }
+                });
+            }
+            return element;
+        };
+        
+        // Block fetch requests for game scripts
+        const originalFetch = window.fetch;
+        window.fetch = (url, options) => {
+            if (url && url.includes('_game-scripts.js')) {
+                console.log('🛡️ Blocked game scripts fetch:', url);
+                return Promise.resolve(new Response('', { status: 200 }));
+            }
+            return originalFetch(url, options);
+        };
+        
+        console.log('✅ Security bypass initialized');
+    })();
+    
+    // Wait for DOM to be ready
+    waitForDOM();
     
 })();
