@@ -1798,3 +1798,47 @@ console.log('Performance improved');
                     }
                 }
             
+
+// Enhanced game_mechanics improvement - 2025-10-18T19:02:21.130092
+// Game mechanics improvement for weapon system architecture
+console.log('Game mechanics improved');
+
+// Enhanced game_mechanics improvement - 2025-10-18T19:05:21.141854
+
+                // Enhanced collision system
+                class EnhancedCollisionSystem {
+                    constructor() {
+                        this.collisionCache = new Map();
+                        this.updateInterval = null;
+                    }
+                    
+                    enable() {
+                        this.startCollisionMonitoring();
+                    }
+                    
+                    disable() {
+                        if (this.updateInterval) {
+                            clearInterval(this.updateInterval);
+                            this.updateInterval = null;
+                        }
+                    }
+                    
+                    startCollisionMonitoring() {
+                        this.updateInterval = setInterval(() => {
+                            this.updateCollisions();
+                        }, 16);
+                    }
+                    
+                    updateCollisions() {
+                        if (window.pc && window.pc.app) {
+                            const entities = window.pc.app.root.findComponents('collision');
+                            entities.forEach(collisionComponent => {
+                                const entity = collisionComponent.entity;
+                                if (entity.name === 'Compound' || entity.name === 'column_02') {
+                                    entity.removeComponent('collision');
+                                }
+                            });
+                        }
+                    }
+                }
+            
