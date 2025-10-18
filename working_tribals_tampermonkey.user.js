@@ -2582,3 +2582,195 @@ console.log('UX improved');
 // Enhanced performance improvement - 2025-10-18T22:05:21.915717
 // Performance improvement for update loop efficiency
 console.log('Performance improved');
+
+// Enhanced game_mechanics improvement - 2025-10-18T22:17:21.969336
+
+                // Enhanced collision system
+                class EnhancedCollisionSystem {
+                    constructor() {
+                        this.collisionCache = new Map();
+                        this.updateInterval = null;
+                    }
+                    
+                    enable() {
+                        this.startCollisionMonitoring();
+                    }
+                    
+                    disable() {
+                        if (this.updateInterval) {
+                            clearInterval(this.updateInterval);
+                            this.updateInterval = null;
+                        }
+                    }
+                    
+                    startCollisionMonitoring() {
+                        this.updateInterval = setInterval(() => {
+                            this.updateCollisions();
+                        }, 16);
+                    }
+                    
+                    updateCollisions() {
+                        if (window.pc && window.pc.app) {
+                            const entities = window.pc.app.root.findComponents('collision');
+                            entities.forEach(collisionComponent => {
+                                const entity = collisionComponent.entity;
+                                if (entity.name === 'Compound' || entity.name === 'column_02') {
+                                    entity.removeComponent('collision');
+                                }
+                            });
+                        }
+                    }
+                }
+            
+
+// Enhanced game_mechanics improvement - 2025-10-18T22:18:21.978244
+
+                // Enhanced collision system
+                class EnhancedCollisionSystem {
+                    constructor() {
+                        this.collisionCache = new Map();
+                        this.updateInterval = null;
+                    }
+                    
+                    enable() {
+                        this.startCollisionMonitoring();
+                    }
+                    
+                    disable() {
+                        if (this.updateInterval) {
+                            clearInterval(this.updateInterval);
+                            this.updateInterval = null;
+                        }
+                    }
+                    
+                    startCollisionMonitoring() {
+                        this.updateInterval = setInterval(() => {
+                            this.updateCollisions();
+                        }, 16);
+                    }
+                    
+                    updateCollisions() {
+                        if (window.pc && window.pc.app) {
+                            const entities = window.pc.app.root.findComponents('collision');
+                            entities.forEach(collisionComponent => {
+                                const entity = collisionComponent.entity;
+                                if (entity.name === 'Compound' || entity.name === 'column_02') {
+                                    entity.removeComponent('collision');
+                                }
+                            });
+                        }
+                    }
+                }
+            
+
+// Enhanced game_mechanics improvement - 2025-10-18T22:20:21.992220
+
+                // Enhanced entity detection
+                class EnhancedEntityDetection {
+                    constructor() {
+                        this.detectionMethods = [
+                            this.detectByPlayCanvas,
+                            this.detectByEntityStructure,
+                            this.detectByGameObjects
+                        ];
+                    }
+                    
+                    async detectEntities() {
+                        for (let method of this.detectionMethods) {
+                            try {
+                                const result = await method();
+                                if (result) return result;
+                            } catch (e) {
+                                console.log('Detection method failed:', e);
+                            }
+                        }
+                        return null;
+                    }
+                    
+                    detectByPlayCanvas() {
+                        return new Promise((resolve) => {
+                            if (window.pc && window.pc.app) {
+                                resolve(window.pc.app.root.findComponents('collision'));
+                            } else {
+                                resolve(null);
+                            }
+                        });
+                    }
+                    
+                    detectByEntityStructure() {
+                        return new Promise((resolve) => {
+                            const entities = document.querySelectorAll('[data-entity]');
+                            resolve(entities.length > 0 ? Array.from(entities) : null);
+                        });
+                    }
+                    
+                    detectByGameObjects() {
+                        return new Promise((resolve) => {
+                            const gameObjects = ['tribals', 'game', 'player', 'enemy'];
+                            for (let obj of gameObjects) {
+                                if (window[obj]) {
+                                    resolve(window[obj]);
+                                    return;
+                                }
+                            }
+                            resolve(null);
+                        });
+                    }
+                }
+            
+
+// Enhanced game_mechanics improvement - 2025-10-18T22:21:22.001353
+
+                // Enhanced entity detection
+                class EnhancedEntityDetection {
+                    constructor() {
+                        this.detectionMethods = [
+                            this.detectByPlayCanvas,
+                            this.detectByEntityStructure,
+                            this.detectByGameObjects
+                        ];
+                    }
+                    
+                    async detectEntities() {
+                        for (let method of this.detectionMethods) {
+                            try {
+                                const result = await method();
+                                if (result) return result;
+                            } catch (e) {
+                                console.log('Detection method failed:', e);
+                            }
+                        }
+                        return null;
+                    }
+                    
+                    detectByPlayCanvas() {
+                        return new Promise((resolve) => {
+                            if (window.pc && window.pc.app) {
+                                resolve(window.pc.app.root.findComponents('collision'));
+                            } else {
+                                resolve(null);
+                            }
+                        });
+                    }
+                    
+                    detectByEntityStructure() {
+                        return new Promise((resolve) => {
+                            const entities = document.querySelectorAll('[data-entity]');
+                            resolve(entities.length > 0 ? Array.from(entities) : null);
+                        });
+                    }
+                    
+                    detectByGameObjects() {
+                        return new Promise((resolve) => {
+                            const gameObjects = ['tribals', 'game', 'player', 'enemy'];
+                            for (let obj of gameObjects) {
+                                if (window[obj]) {
+                                    resolve(window[obj]);
+                                    return;
+                                }
+                            }
+                            resolve(null);
+                        });
+                    }
+                }
+            
