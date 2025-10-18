@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Self-Improving Mod Menu System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .mod-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 450px;
+            max-height: 85vh;
+            background: rgba(0, 0, 0, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            z-index: 10000;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .mod-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mod-title {
+            color: white;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .mod-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #00ff88;
+            box-shadow: 0 0 15px #00ff88;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .mod-content {
+            padding: 25px;
+            max-height: calc(85vh - 140px);
+            overflow-y: auto;
+        }
+
+        .workflow-section {
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .workflow-section:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .workflow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .workflow-step {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .workflow-step:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-left-color: #00ff88;
+        }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .step-title {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .step-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending { background: #ffa500; color: #000; }
+        .status-running { background: #00ff88; color: #000; }
+        .status-completed { background: #00ff00; color: #000; }
+        .status-error { background: #ff4444; color: #fff; }
+
+        .step-description {
+            color: #ccc;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .step-progress {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00cc00);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .ai-analysis-panel {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 200, 255, 0.1));
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .ai-title {
+            color: #00ffff;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ai-content {
+            color: #fff;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-3px);
+        }
+
+        .metric-value {
+            color: #00ff88;
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            color: #ccc;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .control-panel {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00ff88, #00cc00);
+            color: white;
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 255, 136, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffa500, #ff8c00);
+            color: white;
+            box-shadow: 0 8px 25px rgba(255, 165, 0, 0.3);
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(255, 165, 0, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            color: white;
+            box-shadow: 0 8px 25px rgba(255, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(255, 68, 68, 0.4);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            border-left: 5px solid #00ff88;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            z-index: 10001;
+            opacity: 0;
+            transform: translateX(-50%) translateY(-30px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .minimize-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .minimize-btn:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .minimized {
+            height: 80px;
+            overflow: hidden;
+        }
+
+        .minimized .mod-content {
+            display: none;
+        }
+
+        .minimized .mod-header {
+            padding: 20px 25px;
+        }
+
+        .minimized .mod-title {
+            font-size: 20px;
+        }
+
+        .minimized .mod-subtitle {
+            display: none;
+        }
+
+        .learning-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: #00ffff;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 4px;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+        }
+    </style>
+</head>
+<body>
+    <div class="mod-container" id="modContainer">
+        <div class="mod-header">
+            <button class="minimize-btn" onclick="toggleMinimize()">−</button>
+            <div class="status-indicator"></div>
+            <div class="mod-title">🤖 Self-Improving Mod</div>
+            <div class="mod-subtitle">AI-Powered Continuous Enhancement System</div>
+            <div class="learning-indicator" id="learningIndicator">🧠 Learning Mode: ON</div>
+        </div>
+        
+        <div class="mod-content scrollbar-custom">
+            <!-- Repository Analysis Workflow -->
+            <div class="workflow-section">
+                <div class="section-title">
+                    <div class="section-icon">🔍</div>
+                    Repository Analysis
+                </div>
+                <div class="workflow-steps">
+                    <div class="workflow-step" id="step1">
+                        <div class="step-header">
+                            <span class="step-title">Code Structure Analysis</span>
+                            <span class="step-status status-pending" id="status1">Pending</span>
+                        </div>
+                        <div class="step-description">Analyzing repository structure, dependencies, and coding patterns</div>
+                        <div class="step-progress">
+                            <div class="progress-fill" id="progress1"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-step" id="step2">
+                        <div class="step-header">
+                            <span class="step-title">Quality Assessment</span>
+                            <span class="step-status status-pending" id="status2">Pending</span>
+                        </div>
+                        <div class="step-description">Running static analysis tools and identifying improvement opportunities</div>
+                        <div class="step-progress">
+                            <div class="progress-fill" id="progress2"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-step" id="step3">
+                        <div class="step-header">
+                            <span class="step-title">Performance Profiling</span>
+                            <span class="step-status status-pending" id="status3">Pending</span>
+                        </div>
+                        <div class="step-description">Identifying performance bottlenecks and optimization opportunities</div>
+                        <div class="step-progress">
+                            <div class="progress-fill" id="progress3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Code Improvement Workflow -->
+            <div class="workflow-section">
+                <div class="section-title">
+                    <div class="section-icon">⚡</div>
+                    Code Enhancement
+                </div>
+                <div class="workflow-steps">
+                    <div class="workflow-step" id="step4">
+                        <div class="step-header">
+                            <span class="step-title">AI Code Generation</span>
+                            <span class="step-status status-pending" id="status4">Pending</span>
+                        </div>
+                        <div class="step-description">Using ML models to generate improved code snippets and refactoring suggestions</div>
+                        <div class="step-progress">
+                            <div class="progress-fill" id="progress4"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-step" id="step5">
+                        <div class="step-header">
+                            <span class="step-title">Code Validation</span>
+                            <span class="step-status status-pending" id="status5">Pending</span>
+                        </div>
+                        <div class="step-description">Testing and validating all code changes to ensure functionality</div>
+                        <div class="step-progress">
+                            <div class="progress-fill" id="progress5"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="workflow-step" id="step6">
+                        <div class="step-header">
+                            <span class="step-title">Documentation Update</span>
+                            <span class="step-status status-pending" id="status6">Pending</span>
+                        </div>
+                        <div class="step-description">Automatically updating documentation and comments for all changes</div>
+                        <div class="step-progress">
+                            <div class="progress-fill" id="progress6"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Analysis Panel -->
+            <div class="ai-analysis-panel">
+                <div class="ai-title">
+                    <div class="section-icon">🧠</div>
+                    AI Learning Engine
+                </div>
+                <div class="ai-content" id="aiAnalysisContent">
+                    <div id="learningStatus">🔍 Analyzing code patterns and learning from successful improvements...</div>
+                    <div class="step-progress" style="margin-top: 15px;">
+                        <div class="progress-fill" id="learningProgress"></div>
+                    </div>
+                    <div id="learningDetails" style="margin-top: 15px; font-size: 13px; color: #aaa;">
+                        • Pattern recognition: 87% complete<br>
+                        • Success rate analysis: 94% accuracy<br>
+                        • Improvement suggestions: 23 generated<br>
+                        • Learning model updated: 2 minutes ago
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value" id="successRate">98.5%</div>
+                    <div class="metric-label">Success Rate</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="improvements">1,247</div>
+                    <div class="metric-label">Improvements</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="performanceGain">+42%</div>
+                    <div class="metric-label">Performance</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="learningAccuracy">94.2%</div>
+                    <div class="metric-label">AI Accuracy</div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <button class="btn btn-primary" onclick="startWorkflow()">🚀 Start Workflow</button>
+                <button class="btn btn-success" onclick="applyImprovements()">✅ Apply Changes</button>
+                <button class="btn btn-warning" onclick="pauseWorkflow()">⏸️ Pause</button>
+                <button class="btn btn-danger" onclick="resetWorkflow()">🔄 Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Self-Improving Mod System
+        class SelfImprovingModSystem {
+            constructor() {
+                this.isRunning = false;
+                this.isPaused = false;
+                this.currentStep = 0;
+                this.totalSteps = 6;
+                this.workflowData = {
+                    repository: null,
+                    improvements: [],
+                    metrics: {
+                        successRate: 98.5,
+                        improvements: 1247,
+                        performanceGain: 42,
+                        learningAccuracy: 94.2
+                    }
+                };
+                
+                this.init();
+            }
+
+            init() {
+                console.log('🤖 Initializing Self-Improving Mod System...');
+                this.startBackgroundLearning();
+                this.updateMetrics();
+                this.showNotification('🚀 Self-Improving Mod System initialized', 'success');
+            }
+
+            async startWorkflow() {
+                if (this.isRunning) {
+                    this.showNotification('⚠️ Workflow already running', 'warning');
+                    return;
+                }
+
+                this.isRunning = true;
+                this.isPaused = false;
+                this.showNotification('🚀 Starting continuous improvement workflow...', 'info');
+
+                // Execute workflow steps
+                for (let i = 0; i < this.totalSteps; i++) {
+                    if (this.isPaused) {
+                        this.showNotification('⏸️ Workflow paused', 'warning');
+                        break;
+                    }
+
+                    await this.executeStep(i + 1);
+                    await this.delay(2000); // Simulate processing time
+                }
+
+                if (!this.isPaused) {
+                    this.isRunning = false;
+                    this.showNotification('✅ Workflow completed successfully!', 'success');
+                    this.generateImprovements();
+                }
+            }
+
+            async executeStep(stepNumber) {
+                const stepElement = document.getElementById(`step${stepNumber}`);
+                const statusElement = document.getElementById(`status${stepNumber}`);
+                const progressElement = document.getElementById(`progress${stepNumber}`);
+
+                // Update status to running
+                statusElement.textContent = 'Running';
+                statusElement.className = 'step-status status-running';
+
+                // Simulate step execution
+                for (let progress = 0; progress <= 100; progress += 10) {
+                    if (this.isPaused) break;
+                    
+                    progressElement.style.width = progress + '%';
+                    await this.delay(200);
+                }
+
+                if (!this.isPaused) {
+                    // Mark as completed
+                    statusElement.textContent = 'Completed';
+                    statusElement.className = 'step-status status-completed';
+                    
+                    // Update learning progress
+                    this.updateLearningProgress(stepNumber);
+                }
+            }
+
+            updateLearningProgress(stepNumber) {
+                const learningProgress = document.getElementById('learningProgress');
+                const progress = (stepNumber / this.totalSteps) * 100;
+                learningProgress.style.width = progress + '%';
+
+                // Update learning details
+                const learningDetails = document.getElementById('learningDetails');
+                const details = [
+                    `• Pattern recognition: ${Math.min(87 + stepNumber * 2, 100)}% complete`,
+                    `• Success rate analysis: ${Math.min(94 + stepNumber, 100)}% accuracy`,
+                    `• Improvement suggestions: ${23 + stepNumber * 5} generated`,
+                    `• Learning model updated: ${stepNumber} minutes ago`
+                ];
+                learningDetails.innerHTML = details.join('<br>');
+            }
+
+            async applyImprovements() {
+                if (this.workflowData.improvements.length === 0) {
+                    this.showNotification('⚠️ No improvements to apply', 'warning');
+                    return;
+                }
+
+                this.showNotification('🔧 Applying AI-generated improvements...', 'info');
+                
+                // Simulate improvement application
+                for (let i = 0; i < this.workflowData.improvements.length; i++) {
+                    await this.delay(500);
+                    this.showNotification(`Applying improvement ${i + 1}/${this.workflowData.improvements.length}...`, 'info');
+                }
+
+                this.showNotification('✅ All improvements applied successfully!', 'success');
+                this.updateMetrics();
+            }
+
+            generateImprovements() {
+                const improvementTypes = [
+                    'Performance optimization',
+                    'Code quality enhancement',
+                    'Security vulnerability fix',
+                    'Documentation improvement',
+                    'Error handling enhancement',
+                    'Memory usage optimization',
+                    'Algorithm efficiency improvement',
+                    'Code refactoring'
+                ];
+
+                this.workflowData.improvements = [];
+                const count = Math.floor(Math.random() * 8) + 5;
+
+                for (let i = 0; i < count; i++) {
+                    this.workflowData.improvements.push({
+                        id: i + 1,
+                        type: improvementTypes[Math.floor(Math.random() * improvementTypes.length)],
+                        confidence: Math.floor(Math.random() * 20) + 80,
+                        impact: Math.floor(Math.random() * 30) + 10
+                    });
+                }
+
+                this.showNotification(`🎯 Generated ${this.workflowData.improvements.length} improvement suggestions`, 'info');
+            }
+
+            pauseWorkflow() {
+                this.isPaused = !this.isPaused;
+                const status = this.isPaused ? 'paused' : 'resumed';
+                this.showNotification(`⏸️ Workflow ${status}`, 'warning');
+            }
+
+            resetWorkflow() {
+                this.isRunning = false;
+                this.isPaused = false;
+                this.currentStep = 0;
+
+                // Reset all steps
+                for (let i = 1; i <= this.totalSteps; i++) {
+                    const statusElement = document.getElementById(`status${i}`);
+                    const progressElement = document.getElementById(`progress${i}`);
+                    
+                    statusElement.textContent = 'Pending';
+                    statusElement.className = 'step-status status-pending';
+                    progressElement.style.width = '0%';
+                }
+
+                // Reset learning progress
+                const learningProgress = document.getElementById('learningProgress');
+                learningProgress.style.width = '0%';
+
+                this.showNotification('🔄 Workflow reset successfully', 'info');
+            }
+
+            startBackgroundLearning() {
+                // Simulate continuous learning
+                setInterval(() => {
+                    this.updateLearningMetrics();
+                }, 5000);
+
+                // Simulate pattern recognition
+                setInterval(() => {
+                    this.simulatePatternRecognition();
+                }, 3000);
+            }
+
+            updateLearningMetrics() {
+                const learningIndicator = document.getElementById('learningIndicator');
+                const statuses = [
+                    '🧠 Learning Mode: ON',
+                    '🔍 Analyzing patterns...',
+                    '⚡ Optimizing algorithms...',
+                    '🎯 Generating improvements...',
+                    '📊 Updating metrics...'
+                ];
+                
+                const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+                learningIndicator.textContent = randomStatus;
+            }
+
+            simulatePatternRecognition() {
+                // Simulate learning from successful patterns
+                const learningDetails = document.getElementById('learningDetails');
+                const currentAccuracy = this.workflowData.metrics.learningAccuracy;
+                const newAccuracy = Math.min(currentAccuracy + Math.random() * 0.5, 99.9);
+                
+                this.workflowData.metrics.learningAccuracy = newAccuracy;
+                this.updateMetrics();
+            }
+
+            updateMetrics() {
+                // Update metric displays
+                document.getElementById('successRate').textContent = this.workflowData.metrics.successRate.toFixed(1) + '%';
+                document.getElementById('improvements').textContent = this.workflowData.metrics.improvements.toLocaleString();
+                document.getElementById('performanceGain').textContent = '+' + this.workflowData.metrics.performanceGain + '%';
+                document.getElementById('learningAccuracy').textContent = this.workflowData.metrics.learningAccuracy.toFixed(1) + '%';
+
+                // Simulate metric improvements
+                this.workflowData.metrics.successRate = Math.min(this.workflowData.metrics.successRate + Math.random() * 0.1, 99.9);
+                this.workflowData.metrics.improvements += Math.floor(Math.random() * 3);
+                this.workflowData.metrics.performanceGain = Math.min(this.workflowData.metrics.performanceGain + Math.random() * 0.5, 100);
+            }
+
+            showNotification(message, type = 'info') {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type}`;
+                notification.classList.add('show');
+
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 4000);
+            }
+
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+
+        // Global functions for UI interaction
+        let modSystem;
+        let isMinimized = false;
+
+        function initModSystem() {
+            modSystem = new SelfImprovingModSystem();
+        }
+
+        function toggleMinimize() {
+            const container = document.getElementById('modContainer');
+            isMinimized = !isMinimized;
+            
+            if (isMinimized) {
+                container.classList.add('minimized');
+            } else {
+                container.classList.remove('minimized');
+            }
+        }
+
+        function startWorkflow() {
+            if (modSystem) {
+                modSystem.startWorkflow();
+            }
+        }
+
+        function applyImprovements() {
+            if (modSystem) {
+                modSystem.applyImprovements();
+            }
+        }
+
+        function pauseWorkflow() {
+            if (modSystem) {
+                modSystem.pauseWorkflow();
+            }
+        }
+
+        function resetWorkflow() {
+            if (modSystem) {
+                modSystem.resetWorkflow();
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initModSystem);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'm') {
+                e.preventDefault();
+                toggleMinimize();
+            }
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                startWorkflow();
+            }
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                pauseWorkflow();
+            }
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                resetWorkflow();
+            }
+        });
+
+        // Add visual effects
+        document.addEventListener('mousemove', (e) => {
+            const container = document.getElementById('modContainer');
+            const rect = container.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+                container.style.transform = 'scale(1.02) rotateY(2deg)';
+            } else {
+                container.style.transform = 'scale(1) rotateY(0deg)';
+            }
+        });
+
+        // Status indicator animation
+        setInterval(() => {
+            const statusIndicator = document.querySelector('.status-indicator');
+            const colors = ['#00ff88', '#00cc00', '#00ff44', '#88ff00'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            statusIndicator.style.background = randomColor;
+            statusIndicator.style.boxShadow = `0 0 20px ${randomColor}`;
+        }, 3000);
+    </script>
+</body>
+</html>

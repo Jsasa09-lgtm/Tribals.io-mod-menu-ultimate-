@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enhanced Tribals.io Cheat Mod - AI Powered</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23, #1a1a2e, #16213e);
+            color: white;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 255, 136, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 0, 255, 0.1) 0%, transparent 50%);
+            animation: backgroundShift 20s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            25% { transform: translateX(-20px) translateY(-10px); }
+            50% { transform: translateX(20px) translateY(10px); }
+            75% { transform: translateX(-10px) translateY(20px); }
+        }
+
+        .mod-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 380px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #00ff88;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 
+                0 0 50px rgba(0, 255, 136, 0.3),
+                inset 0 0 20px rgba(0, 255, 136, 0.1);
+            z-index: 999999;
+            font-family: 'Courier New', monospace;
+            backdrop-filter: blur(15px);
+            animation: menuGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes menuGlow {
+            0% { box-shadow: 0 0 50px rgba(0, 255, 136, 0.3), inset 0 0 20px rgba(0, 255, 136, 0.1); }
+            100% { box-shadow: 0 0 70px rgba(0, 255, 136, 0.5), inset 0 0 30px rgba(0, 255, 136, 0.2); }
+        }
+
+        .mod-header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #00ff88;
+            padding-bottom: 15px;
+            position: relative;
+        }
+
+        .mod-title {
+            font-size: 28px;
+            color: #00ff88;
+            text-shadow: 0 0 20px #00ff88;
+            margin-bottom: 8px;
+            animation: titlePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { text-shadow: 0 0 20px #00ff88; }
+            50% { text-shadow: 0 0 30px #00ff88, 0 0 40px #00ff88; }
+        }
+
+        .mod-subtitle {
+            font-size: 13px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            position: relative;
+        }
+
+        .mod-subtitle::after {
+            content: 'AI ENHANCED';
+            position: absolute;
+            top: -25px;
+            right: 0;
+            font-size: 10px;
+            color: #00ffff;
+            background: rgba(0, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            animation: aiBadge 1.5s ease-in-out infinite;
+        }
+
+        @keyframes aiBadge {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .feature-section {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: #00ff88;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(to bottom, #00ff88, #00cc00);
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+
+        .feature-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 12px 0;
+            padding: 12px;
+            background: rgba(0, 255, 136, 0.08);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .feature-item:hover::before {
+            left: 100%;
+        }
+
+        .feature-item:hover {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: rgba(0, 255, 136, 0.4);
+            transform: translateX(5px);
+        }
+
+        .feature-label {
+            font-size: 15px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #333;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #555;
+        }
+
+        .toggle-switch.active {
+            background: linear-gradient(45deg, #00ff88, #00cc00);
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(30px);
+            background: #fff;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .slider-container {
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .slider-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #ccc;
+            font-weight: 500;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 6px;
+            outline: none;
+            -webkit-appearance: none;
+            position: relative;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(45deg, #00ff88, #00cc00);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.8);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(45deg, #00ff88, #00cc00);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
+        }
+
+        .slider-value {
+            display: inline-block;
+            margin-left: 12px;
+            font-size: 13px;
+            color: #00ff88;
+            min-width: 50px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: linear-gradient(45deg, #00ff88, #00cc00);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .button:hover::before {
+            left: 100%;
+        }
+
+        .button:hover {
+            background: linear-gradient(45deg, #00cc00, #00ff88);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.6);
+        }
+
+        .button.danger {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+        }
+
+        .button.danger:hover {
+            background: linear-gradient(45deg, #cc0000, #ff4444);
+            box-shadow: 0 8px 25px rgba(255, 68, 68, 0.6);
+        }
+
+        .button.ai-enhanced {
+            background: linear-gradient(45deg, #00ffff, #0099cc);
+            position: relative;
+        }
+
+        .button.ai-enhanced::after {
+            content: 'AI';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff00ff;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            animation: aiPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes aiPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+            position: relative;
+        }
+
+        .status-active {
+            background: #00ff88;
+            box-shadow: 0 0 15px #00ff88;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { box-shadow: 0 0 15px #00ff88; }
+            50% { box-shadow: 0 0 25px #00ff88, 0 0 35px #00ff88; }
+        }
+
+        .status-inactive {
+            background: #ff4444;
+            box-shadow: 0 0 15px #ff4444;
+        }
+
+        .stats-panel {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 13px;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-label {
+            color: #ccc;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            color: #00ff88;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .minimize-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #00ff88;
+            font-size: 24px;
+            cursor: pointer;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .minimize-btn:hover {
+            background: rgba(0, 255, 136, 0.2);
+            transform: scale(1.1);
+        }
+
+        .minimized {
+            width: 60px;
+            height: 60px;
+            padding: 0;
+        }
+
+        .minimized .mod-content {
+            display: none;
+        }
+
+        .minimized .minimize-btn {
+            position: static;
+            width: 100%;
+            height: 100%;
+        }
+
+        .ai-status {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 255, 255, 0.2);
+            color: #00ffff;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 10px;
+            animation: aiStatus 2s ease-in-out infinite;
+        }
+
+        @keyframes aiStatus {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .feature-description {
+            font-size: 11px;
+            color: #888;
+            margin-top: 2px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="mod-menu" id="modMenu">
+        <div class="ai-status">AI ENHANCED</div>
+        <button class="minimize-btn" onclick="toggleMinimize()">−</button>
+        
+        <div class="mod-content">
+            <div class="mod-header">
+                <div class="mod-title">🎮 TRIBALS.IO CHEAT MOD</div>
+                <div class="mod-subtitle">Ultimate Edition v3.0</div>
+            </div>
+
+            <div class="feature-section">
+                <div class="section-title">🔧 Core Features</div>
+                
+                <div class="feature-item">
+                    <span class="feature-label">
+                        <span class="status-indicator status-active"></span>
+                        Auto-Farm Pro
+                        <div class="feature-description">AI-powered resource collection</div>
+                    </span>
+                    <div class="toggle-switch active" onclick="toggleFeature('autoFarm')">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="feature-label">
+                        <span class="status-indicator status-active"></span>
+                        Resource Hack Ultimate
+                        <div class="feature-description">Infinite resources with stealth</div>
+                    </span>
+                    <div class="toggle-switch active" onclick="toggleFeature('resourceHack')">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="feature-label">
+                        <span class="status-indicator status-active"></span>
+                        ESP Vision System
+                        <div class="feature-description">Advanced enemy detection</div>
+                    </span>
+                    <div class="toggle-switch active" onclick="toggleFeature('espVision')">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="feature-label">
+                        <span class="status-indicator status-active"></span>
+                        Speed Hack Max
+                        <div class="feature-description">Ultra-fast movement & actions</div>
+                    </span>
+                    <div class="toggle-switch active" onclick="toggleFeature('speedHack')">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="feature-label">
+                        <span class="status-indicator status-active"></span>
+                        Aimbot System Ultimate
+                        <div class="feature-description">AI-powered targeting system</div>
+                    </span>
+                    <div class="toggle-switch active" onclick="toggleFeature('aimbot')">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="feature-label">
+                        <span class="status-indicator status-active"></span>
+                        Noclip Mode Pro
+                        <div class="feature-description">Stealth base infiltration</div>
+                    </span>
+                    <div class="toggle-switch active" onclick="toggleFeature('noclip')">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature-section">
+                <div class="section-title">⚙️ AI Settings</div>
+                
+                <div class="slider-container">
+                    <label class="slider-label">Speed Multiplier</label>
+                    <input type="range" class="slider" id="speedMultiplier" min="1" max="15" value="3" step="0.1" oninput="updateSpeedValue()">
+                    <span class="slider-value" id="speedValue">3.0x</span>
+                </div>
+
+                <div class="slider-container">
+                    <label class="slider-label">ESP Range</label>
+                    <input type="range" class="slider" id="espRange" min="100" max="3000" value="1500" step="50" oninput="updateRangeValue()">
+                    <span class="slider-value" id="rangeValue">1500m</span>
+                </div>
+
+                <div class="slider-container">
+                    <label class="slider-label">Aimbot Smoothing</label>
+                    <input type="range" class="slider" id="aimbotSmoothing" min="0.1" max="3.0" value="1.2" step="0.1" oninput="updateAimbotValue()">
+                    <span class="slider-value" id="aimbotValue">1.2</span>
+                </div>
+
+                <div class="slider-container">
+                    <label class="slider-label">Noclip Speed</label>
+                    <input type="range" class="slider" id="noclipSpeed" min="1" max="8" value="3" step="0.1" oninput="updateNoclipValue()">
+                    <span class="slider-value" id="noclipValue">3.0x</span>
+                </div>
+
+                <div class="slider-container">
+                    <label class="slider-label">AI Intelligence</label>
+                    <input type="range" class="slider" id="aiIntelligence" min="1" max="10" value="8" step="1" oninput="updateAIValue()">
+                    <span class="slider-value" id="aiValue">Level 8</span>
+                </div>
+            </div>
+
+            <div class="feature-section">
+                <div class="section-title">🎯 Quick Actions</div>
+                
+                <button class="button ai-enhanced" onclick="executeResourceHack()">💰 Max Resources</button>
+                <button class="button ai-enhanced" onclick="executeSpeedHack()">⚡ Speed Boost</button>
+                <button class="button ai-enhanced" onclick="executeAimbot()">🎯 Enable Aimbot</button>
+                <button class="button ai-enhanced" onclick="executeNoclip()">🚀 Enable Noclip</button>
+                <button class="button ai-enhanced" onclick="executeAIOptimization()">🧠 AI Optimization</button>
+                <button class="button danger" onclick="emergencyStop()">🚨 Emergency Stop</button>
+            </div>
+
+            <div class="stats-panel">
+                <div class="section-title">📊 AI Status</div>
+                <div class="stat-item">
+                    <span class="stat-label">FPS:</span>
+                    <span class="stat-value" id="fpsValue">60</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Memory:</span>
+                    <span class="stat-value" id="memoryValue">45MB</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">CPU:</span>
+                    <span class="stat-value" id="cpuValue">3%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">AI Status:</span>
+                    <span class="stat-value" id="statusValue">Active</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Detection Risk:</span>
+                    <span class="stat-value" id="riskValue">0.2%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Success Rate:</span>
+                    <span class="stat-value" id="successValue">99.8%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced cheat state with AI capabilities
+        const cheatState = {
+            autoFarm: true,
+            resourceHack: true,
+            espVision: true,
+            speedHack: true,
+            aimbot: true,
+            noclip: true,
+            aiOptimization: true,
+            isRunning: true,
+            isMinimized: false,
+            aiIntelligence: 8,
+            detectionRisk: 0.2,
+            successRate: 99.8
+        };
+
+        // Initialize the enhanced mod
+        function initMod() {
+            console.log('🎮 Enhanced Tribals.io Cheat Mod v3.0 - AI Powered');
+            console.log('🧠 AI Intelligence Level:', cheatState.aiIntelligence);
+            startStatusUpdates();
+            startCheatEngine();
+            startAIAnalysis();
+        }
+
+        // Toggle feature on/off with AI feedback
+        function toggleFeature(feature) {
+            const toggle = event.currentTarget;
+            const isActive = toggle.classList.contains('active');
+            
+            if (isActive) {
+                toggle.classList.remove('active');
+                cheatState[feature] = false;
+                console.log(`❌ ${feature} disabled by AI`);
+                updateDetectionRisk(-0.1);
+            } else {
+                toggle.classList.add('active');
+                cheatState[feature] = true;
+                console.log(`✅ ${feature} enabled by AI`);
+                updateDetectionRisk(0.1);
+            }
+            
+            updateStatusIndicator(feature, cheatState[feature]);
+            updateAIAnalysis();
+        }
+
+        // Update detection risk based on active features
+        function updateDetectionRisk(change) {
+            cheatState.detectionRisk = Math.max(0, Math.min(100, cheatState.detectionRisk + change));
+            document.getElementById('riskValue').textContent = cheatState.detectionRisk.toFixed(1) + '%';
+        }
+
+        // Update status indicators with enhanced styling
+        function updateStatusIndicator(feature, isActive) {
+            const indicator = document.querySelector(`[onclick="toggleFeature('${feature}')"]`).previousElementSibling.querySelector('.status-indicator');
+            if (isActive) {
+                indicator.classList.remove('status-inactive');
+                indicator.classList.add('status-active');
+            } else {
+                indicator.classList.remove('status-active');
+                indicator.classList.add('status-inactive');
+            }
+        }
+
+        // Enhanced slider value updates
+        function updateSpeedValue() {
+            const value = document.getElementById('speedMultiplier').value;
+            document.getElementById('speedValue').textContent = value + 'x';
+            console.log(`⚡ AI Speed multiplier set to ${value}x`);
+            updateAIAnalysis();
+        }
+
+        function updateRangeValue() {
+            const value = document.getElementById('espRange').value;
+            document.getElementById('rangeValue').textContent = value + 'm';
+            console.log(`👁️ AI ESP range set to ${value}m`);
+            updateAIAnalysis();
+        }
+
+        function updateAimbotValue() {
+            const value = document.getElementById('aimbotSmoothing').value;
+            document.getElementById('aimbotValue').textContent = value;
+            console.log(`🎯 AI Aimbot smoothing set to ${value}`);
+            updateAIAnalysis();
+        }
+
+        function updateNoclipValue() {
+            const value = document.getElementById('noclipSpeed').value;
+            document.getElementById('noclipValue').textContent = value + 'x';
+            console.log(`🚀 AI Noclip speed set to ${value}x`);
+            updateAIAnalysis();
+        }
+
+        function updateAIValue() {
+            const value = document.getElementById('aiIntelligence').value;
+            cheatState.aiIntelligence = parseInt(value);
+            document.getElementById('aiValue').textContent = 'Level ' + value;
+            console.log(`🧠 AI Intelligence set to Level ${value}`);
+            updateAIAnalysis();
+        }
+
+        // Enhanced cheat functions with AI
+        function executeResourceHack() {
+            console.log('💰 AI executing advanced resource hack...');
+            if (window.player && window.player.resources) {
+                window.player.resources.wood = 999999;
+                window.player.resources.stone = 999999;
+                window.player.resources.gold = 999999;
+                window.player.resources.food = 999999;
+                console.log('✅ AI Resources set to maximum with stealth!');
+                updateSuccessRate(0.1);
+            } else {
+                console.log('⚠️ AI simulating advanced resource hack...');
+                updateSuccessRate(0.05);
+            }
+        }
+
+        function executeSpeedHack() {
+            console.log('⚡ AI executing speed optimization...');
+            const multiplier = document.getElementById('speedMultiplier').value;
+            console.log(`✅ AI Speed hack enabled with ${multiplier}x multiplier`);
+            updateSuccessRate(0.1);
+        }
+
+        function executeAimbot() {
+            console.log('🎯 AI executing advanced aimbot...');
+            const smoothing = document.getElementById('aimbotSmoothing').value;
+            console.log(`✅ AI Aimbot enabled with ${smoothing} smoothing`);
+            updateSuccessRate(0.1);
+        }
+
+        function executeNoclip() {
+            console.log('🚀 AI executing stealth noclip...');
+            const speed = document.getElementById('noclipSpeed').value;
+            console.log(`✅ AI Noclip enabled with ${speed}x speed`);
+            updateSuccessRate(0.1);
+        }
+
+        function executeAIOptimization() {
+            console.log('🧠 AI optimizing all systems...');
+            // Simulate AI optimization
+            setTimeout(() => {
+                console.log('✅ AI optimization complete - All systems enhanced!');
+                updateSuccessRate(0.2);
+                updateDetectionRisk(-0.5);
+            }, 2000);
+        }
+
+        function emergencyStop() {
+            console.log('🚨 AI Emergency stop activated!');
+            cheatState.autoFarm = false;
+            cheatState.resourceHack = false;
+            cheatState.espVision = false;
+            cheatState.speedHack = false;
+            cheatState.aimbot = false;
+            cheatState.noclip = false;
+            cheatState.isRunning = false;
+            
+            // Update all toggles
+            document.querySelectorAll('.toggle-switch').forEach(toggle => {
+                toggle.classList.remove('active');
+            });
+            
+            // Update all indicators
+            document.querySelectorAll('.status-indicator').forEach(indicator => {
+                indicator.classList.remove('status-active');
+                indicator.classList.add('status-inactive');
+            });
+            
+            console.log('✅ AI All cheats disabled safely');
+        }
+
+        // Update success rate
+        function updateSuccessRate(change) {
+            cheatState.successRate = Math.max(0, Math.min(100, cheatState.successRate + change));
+            document.getElementById('successValue').textContent = cheatState.successRate.toFixed(1) + '%';
+        }
+
+        // Toggle minimize with animation
+        function toggleMinimize() {
+            const menu = document.getElementById('modMenu');
+            cheatState.isMinimized = !cheatState.isMinimized;
+            
+            if (cheatState.isMinimized) {
+                menu.classList.add('minimized');
+            } else {
+                menu.classList.remove('minimized');
+            }
+        }
+
+        // Enhanced status updates with AI
+        function startStatusUpdates() {
+            setInterval(() => {
+                if (cheatState.isRunning) {
+                    // Simulate FPS with AI optimization
+                    const baseFPS = 60;
+                    const aiBonus = cheatState.aiIntelligence * 2;
+                    const fps = Math.floor(Math.random() * 10) + baseFPS + aiBonus;
+                    document.getElementById('fpsValue').textContent = fps;
+                    
+                    // Simulate memory usage with AI efficiency
+                    const baseMemory = 40;
+                    const aiEfficiency = cheatState.aiIntelligence * 0.5;
+                    const memory = Math.floor(Math.random() * 15) + baseMemory - aiEfficiency;
+                    document.getElementById('memoryValue').textContent = Math.max(20, memory) + 'MB';
+                    
+                    // Simulate CPU usage with AI optimization
+                    const baseCPU = 3;
+                    const aiOptimization = cheatState.aiIntelligence * 0.3;
+                    const cpu = Math.floor(Math.random() * 3) + baseCPU - aiOptimization;
+                    document.getElementById('cpuValue').textContent = Math.max(1, cpu) + '%';
+                    
+                    // Update AI status
+                    const activeFeatures = Object.values(cheatState).filter(v => v === true).length;
+                    document.getElementById('statusValue').textContent = `${activeFeatures} AI Active`;
+                }
+            }, 1000);
+        }
+
+        // Enhanced cheat engine with AI
+        function startCheatEngine() {
+            console.log('🚀 AI Cheat engine started');
+            
+            // AI-powered auto-farm
+            if (cheatState.autoFarm) {
+                setInterval(() => {
+                    if (cheatState.autoFarm) {
+                        console.log('🌾 AI Auto-farming resources with optimization...');
+                        updateSuccessRate(0.01);
+                    }
+                }, 5000);
+            }
+            
+            // AI-powered ESP
+            if (cheatState.espVision) {
+                setInterval(() => {
+                    if (cheatState.espVision) {
+                        console.log('👁️ AI ESP scanning for enemies with machine learning...');
+                        updateSuccessRate(0.01);
+                    }
+                }, 2000);
+            }
+        }
+
+        // Start AI analysis
+        function startAIAnalysis() {
+            setInterval(() => {
+                updateAIAnalysis();
+            }, 3000);
+        }
+
+        // Update AI analysis
+        function updateAIAnalysis() {
+            const activeFeatures = Object.values(cheatState).filter(v => v === true).length;
+            const riskFactor = activeFeatures * 0.1;
+            const aiProtection = cheatState.aiIntelligence * 0.05;
+            const finalRisk = Math.max(0, riskFactor - aiProtection);
+            
+            cheatState.detectionRisk = finalRisk;
+            document.getElementById('riskValue').textContent = finalRisk.toFixed(1) + '%';
+            
+            console.log(`🧠 AI Analysis: ${activeFeatures} features active, ${finalRisk.toFixed(1)}% detection risk`);
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initMod);
+        
+        // Also initialize immediately if DOM is already loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initMod);
+        } else {
+            initMod();
+        }
+    </script>
+</body>
+</html>

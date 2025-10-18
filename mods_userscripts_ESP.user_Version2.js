@@ -1,3 +1,6 @@
+// 🤖 Auto-updated by GitHub Repository Automation
+// Updated: 2025-10-18T18:41:28.546412
+
 // ==UserScript==
 // @name         Tribals.io ESP Highlight
 // @namespace    https://tribals.io/

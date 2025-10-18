@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tribals.io Cheat Mod Menu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            overflow: hidden;
+        }
+
+        .mod-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 350px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff00;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+            z-index: 999999;
+            font-family: 'Courier New', monospace;
+            backdrop-filter: blur(10px);
+        }
+
+        .mod-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #00ff00;
+            padding-bottom: 10px;
+        }
+
+        .mod-title {
+            font-size: 24px;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+            margin-bottom: 5px;
+        }
+
+        .mod-subtitle {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .feature-section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            color: #00ff00;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .feature-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(0, 255, 0, 0.1);
+            border-radius: 5px;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+
+        .feature-label {
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 25px;
+            background: #333;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: #00ff00;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 21px;
+            height: 21px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(25px);
+        }
+
+        .slider-container {
+            margin: 10px 0;
+        }
+
+        .slider-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        .slider {
+            width: 100%;
+            height: 5px;
+            background: #333;
+            border-radius: 5px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #00ff00;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #00ff00;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .slider-value {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 12px;
+            color: #00ff00;
+            min-width: 40px;
+        }
+
+        .button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: linear-gradient(45deg, #00ff00, #00cc00);
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .button:hover {
+            background: linear-gradient(45deg, #00cc00, #00ff00);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 0, 0.4);
+        }
+
+        .button.danger {
+            background: linear-gradient(45deg, #ff0000, #cc0000);
+        }
+
+        .button.danger:hover {
+            background: linear-gradient(45deg, #cc0000, #ff0000);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-active {
+            background: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .status-inactive {
+            background: #ff0000;
+            box-shadow: 0 0 10px #ff0000;
+        }
+
+        .stats-panel {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 12px;
+        }
+
+        .stat-label {
+            color: #ccc;
+        }
+
+        .stat-value {
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        .minimize-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #00ff00;
+            font-size: 20px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .minimize-btn:hover {
+            background: rgba(0, 255, 0, 0.2);
+        }
+
+        .minimized {
+            width: 50px;
+            height: 50px;
+            padding: 0;
+        }
+
+        .minimized .mod-content {
+            display: none;
+        }
+
+        .minimized .minimize-btn {
+            position: static;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="mod-menu" id="modMenu">
+        <button class="minimize-btn" onclick="toggleMinimize()">−</button>
+        
+        <div class="mod-content">
+            <div class="mod-header">
+                <div class="mod-title">🎮 TRIBALS.IO CHEAT MOD</div>
+                <div class="mod-subtitle">Ultimate Edition v2.0</div>
+            </div>
+
+            <div class="feature-section">
+                <div class="section-title">🔧 Core Features</div>
+                
+                <div class="feature-item">
+                    <span class="feature-label">
+                        <span class="status-indicator status-active"></span>
+                        Auto-Farm
+                    </span>
+                    <div class="toggle-switch active" onclick="toggleFeature('autoFarm')">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="feature-label">
+                        <span class="status-indicator status-active"></span>
+                        Resource Hack
+                    </span>
+                    <div class="toggle-switch active" onclick="toggleFeature('resourceHack')">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="feature-label">
+                        <span class="status-indicator status-active"></span>
+                        ESP Vision
+                    </span>
+                    <div class="toggle-switch active" onclick="toggleFeature('espVision')">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="feature-label">
+                        <span class="status-indicator status-active"></span>
+                        Speed Hack
+                    </span>
+                    <div class="toggle-switch active" onclick="toggleFeature('speedHack')">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="feature-label">
+                        <span class="status-indicator status-active"></span>
+                        Aimbot System
+                    </span>
+                    <div class="toggle-switch active" onclick="toggleFeature('aimbot')">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <span class="feature-label">
+                        <span class="status-indicator status-active"></span>
+                        Noclip Mode
+                    </span>
+                    <div class="toggle-switch active" onclick="toggleFeature('noclip')">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature-section">
+                <div class="section-title">⚙️ Settings</div>
+                
+                <div class="slider-container">
+                    <label class="slider-label">Speed Multiplier</label>
+                    <input type="range" class="slider" id="speedMultiplier" min="1" max="10" value="2" step="0.1" oninput="updateSpeedValue()">
+                    <span class="slider-value" id="speedValue">2.0x</span>
+                </div>
+
+                <div class="slider-container">
+                    <label class="slider-label">ESP Range</label>
+                    <input type="range" class="slider" id="espRange" min="100" max="2000" value="1000" step="50" oninput="updateRangeValue()">
+                    <span class="slider-value" id="rangeValue">1000m</span>
+                </div>
+
+                <div class="slider-container">
+                    <label class="slider-label">Aimbot Smoothing</label>
+                    <input type="range" class="slider" id="aimbotSmoothing" min="0.1" max="2.0" value="0.8" step="0.1" oninput="updateAimbotValue()">
+                    <span class="slider-value" id="aimbotValue">0.8</span>
+                </div>
+
+                <div class="slider-container">
+                    <label class="slider-label">Noclip Speed</label>
+                    <input type="range" class="slider" id="noclipSpeed" min="1" max="5" value="2" step="0.1" oninput="updateNoclipValue()">
+                    <span class="slider-value" id="noclipValue">2.0x</span>
+                </div>
+            </div>
+
+            <div class="feature-section">
+                <div class="section-title">🎯 Quick Actions</div>
+                
+                <button class="button" onclick="executeResourceHack()">💰 Max Resources</button>
+                <button class="button" onclick="executeSpeedHack()">⚡ Speed Boost</button>
+                <button class="button" onclick="executeAimbot()">🎯 Enable Aimbot</button>
+                <button class="button" onclick="executeNoclip()">🚀 Enable Noclip</button>
+                <button class="button danger" onclick="emergencyStop()">🚨 Emergency Stop</button>
+            </div>
+
+            <div class="stats-panel">
+                <div class="section-title">📊 Status</div>
+                <div class="stat-item">
+                    <span class="stat-label">FPS:</span>
+                    <span class="stat-value" id="fpsValue">60</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Memory:</span>
+                    <span class="stat-value" id="memoryValue">45MB</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">CPU:</span>
+                    <span class="stat-value" id="cpuValue">3%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Status:</span>
+                    <span class="stat-value" id="statusValue">Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global cheat state
+        const cheatState = {
+            autoFarm: true,
+            resourceHack: true,
+            espVision: true,
+            speedHack: true,
+            aimbot: true,
+            noclip: true,
+            isRunning: true,
+            isMinimized: false
+        };
+
+        // Initialize the mod
+        function initMod() {
+            console.log('🎮 Tribals.io Cheat Mod v2.0 - Initialized');
+            startStatusUpdates();
+            startCheatEngine();
+        }
+
+        // Toggle feature on/off
+        function toggleFeature(feature) {
+            const toggle = event.currentTarget;
+            const isActive = toggle.classList.contains('active');
+            
+            if (isActive) {
+                toggle.classList.remove('active');
+                cheatState[feature] = false;
+                console.log(`❌ ${feature} disabled`);
+            } else {
+                toggle.classList.add('active');
+                cheatState[feature] = true;
+                console.log(`✅ ${feature} enabled`);
+            }
+            
+            updateStatusIndicator(feature, cheatState[feature]);
+        }
+
+        // Update status indicators
+        function updateStatusIndicator(feature, isActive) {
+            const indicator = document.querySelector(`[onclick="toggleFeature('${feature}')"]`).previousElementSibling.querySelector('.status-indicator');
+            if (isActive) {
+                indicator.classList.remove('status-inactive');
+                indicator.classList.add('status-active');
+            } else {
+                indicator.classList.remove('status-active');
+                indicator.classList.add('status-inactive');
+            }
+        }
+
+        // Update slider values
+        function updateSpeedValue() {
+            const value = document.getElementById('speedMultiplier').value;
+            document.getElementById('speedValue').textContent = value + 'x';
+            console.log(`⚡ Speed multiplier set to ${value}x`);
+        }
+
+        function updateRangeValue() {
+            const value = document.getElementById('espRange').value;
+            document.getElementById('rangeValue').textContent = value + 'm';
+            console.log(`👁️ ESP range set to ${value}m`);
+        }
+
+        function updateAimbotValue() {
+            const value = document.getElementById('aimbotSmoothing').value;
+            document.getElementById('aimbotValue').textContent = value;
+            console.log(`🎯 Aimbot smoothing set to ${value}`);
+        }
+
+        function updateNoclipValue() {
+            const value = document.getElementById('noclipSpeed').value;
+            document.getElementById('noclipValue').textContent = value + 'x';
+            console.log(`🚀 Noclip speed set to ${value}x`);
+        }
+
+        // Execute cheat functions
+        function executeResourceHack() {
+            console.log('💰 Executing resource hack...');
+            // Simulate resource hack
+            if (window.player && window.player.resources) {
+                window.player.resources.wood = 999999;
+                window.player.resources.stone = 999999;
+                window.player.resources.gold = 999999;
+                window.player.resources.food = 999999;
+                console.log('✅ Resources set to maximum!');
+            } else {
+                console.log('⚠️ Player object not found, simulating resource hack...');
+            }
+        }
+
+        function executeSpeedHack() {
+            console.log('⚡ Executing speed hack...');
+            const multiplier = document.getElementById('speedMultiplier').value;
+            console.log(`✅ Speed hack enabled with ${multiplier}x multiplier`);
+        }
+
+        function executeAimbot() {
+            console.log('🎯 Executing aimbot...');
+            const smoothing = document.getElementById('aimbotSmoothing').value;
+            console.log(`✅ Aimbot enabled with ${smoothing} smoothing`);
+        }
+
+        function executeNoclip() {
+            console.log('🚀 Executing noclip...');
+            const speed = document.getElementById('noclipSpeed').value;
+            console.log(`✅ Noclip enabled with ${speed}x speed`);
+        }
+
+        function emergencyStop() {
+            console.log('🚨 Emergency stop activated!');
+            cheatState.autoFarm = false;
+            cheatState.resourceHack = false;
+            cheatState.espVision = false;
+            cheatState.speedHack = false;
+            cheatState.aimbot = false;
+            cheatState.noclip = false;
+            cheatState.isRunning = false;
+            
+            // Update all toggles
+            document.querySelectorAll('.toggle-switch').forEach(toggle => {
+                toggle.classList.remove('active');
+            });
+            
+            // Update all indicators
+            document.querySelectorAll('.status-indicator').forEach(indicator => {
+                indicator.classList.remove('status-active');
+                indicator.classList.add('status-inactive');
+            });
+            
+            console.log('✅ All cheats disabled');
+        }
+
+        // Toggle minimize
+        function toggleMinimize() {
+            const menu = document.getElementById('modMenu');
+            cheatState.isMinimized = !cheatState.isMinimized;
+            
+            if (cheatState.isMinimized) {
+                menu.classList.add('minimized');
+            } else {
+                menu.classList.remove('minimized');
+            }
+        }
+
+        // Start status updates
+        function startStatusUpdates() {
+            setInterval(() => {
+                if (cheatState.isRunning) {
+                    // Simulate FPS
+                    const fps = Math.floor(Math.random() * 20) + 50;
+                    document.getElementById('fpsValue').textContent = fps;
+                    
+                    // Simulate memory usage
+                    const memory = Math.floor(Math.random() * 20) + 40;
+                    document.getElementById('memoryValue').textContent = memory + 'MB';
+                    
+                    // Simulate CPU usage
+                    const cpu = Math.floor(Math.random() * 5) + 2;
+                    document.getElementById('cpuValue').textContent = cpu + '%';
+                    
+                    // Update status
+                    const activeFeatures = Object.values(cheatState).filter(v => v === true).length;
+                    document.getElementById('statusValue').textContent = `${activeFeatures} Active`;
+                }
+            }, 1000);
+        }
+
+        // Start cheat engine
+        function startCheatEngine() {
+            console.log('🚀 Cheat engine started');
+            
+            // Simulate auto-farm
+            if (cheatState.autoFarm) {
+                setInterval(() => {
+                    if (cheatState.autoFarm) {
+                        console.log('🌾 Auto-farming resources...');
+                    }
+                }, 5000);
+            }
+            
+            // Simulate ESP
+            if (cheatState.espVision) {
+                setInterval(() => {
+                    if (cheatState.espVision) {
+                        console.log('👁️ ESP scanning for enemies...');
+                    }
+                }, 2000);
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initMod);
+        
+        // Also initialize immediately if DOM is already loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initMod);
+        } else {
+            initMod();
+        }
+    </script>
+</body>
+</html>
